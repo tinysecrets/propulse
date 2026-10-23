@@ -6,10 +6,11 @@ import android.content.Context
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.launch
+import org.json.JSONArray
 
 /**
  * Optional FCM adapter. The consuming application must configure Firebase for its package.
- * Notifications are acknowledged only when the payload carries a server run_id.
+ * Notifications acknowledge the server run_id and any coalesced run_ids in a data payload.
  */
 class PropulseMessagingService : FirebaseMessagingService() {
 
@@ -57,10 +58,19 @@ class PropulseMessagingService : FirebaseMessagingService() {
             if (speak) ProPulse.voice.speak(body, urgent)
         }
 
+        val runIds = linkedSetOf<String>()
+        data["run_id"]?.takeIf { it.isNotBlank() }?.let(runIds::add)
+        data["run_ids"]?.let { encoded ->
+            runCatching { JSONArray(encoded) }.getOrNull()?.let { array ->
+                for (index in 0 until array.length()) {
+                    array.optString(index).takeIf { it.isNotBlank() }?.let(runIds::add)
+                }
+            }
+        }
+
         ProPulse.scope.launch {
             runCatching { PulseRegistry.flush(applicationContext, ProPulse.client) }
-            val runId = data["run_id"].orEmpty()
-            if (runId.isNotBlank()) {
+            runIds.forEach { runId ->
                 runCatching { ProPulse.client.ack(runId, "push") }
             }
             runCatching { ProPulse.scheduler.scheduleAdaptiveChain() }

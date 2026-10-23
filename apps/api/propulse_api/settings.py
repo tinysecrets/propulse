@@ -46,6 +46,11 @@ class Settings(BaseSettings):
     tts_driver: str = "device"
     piper_model_path: str = "/opt/piper/en_US-amy-medium.onnx"
 
+    # Optional native Android push. Disabled by default so the local stack needs no cloud account.
+    fcm_enabled: bool = False
+    fcm_project_id: str = ""
+    fcm_service_account_json: str = ""
+
     # limits
     rate_limit_free: int = 60
     rate_limit_pro: int = 600

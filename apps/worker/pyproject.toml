@@ -3,7 +3,7 @@ name = "propulse-worker"
 version = "1.0.0"
 license = { text = "AGPL-3.0-or-later" }
 requires-python = ">=3.11"
-dependencies = ["propulse-core", "structlog>=24.4", "httpx>=0.28", "prometheus-client>=0.21"]
+dependencies = ["propulse-core", "structlog>=24.4", "httpx>=0.28", "prometheus-client>=0.21", "google-auth>=2.40"]
 
 [build-system]
 requires = ["hatchling"]

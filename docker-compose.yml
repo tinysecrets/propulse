@@ -58,6 +58,9 @@ services:
     environment:
       <<: *env
       WORKER_ROLE: voice
+      FCM_ENABLED: ${FCM_ENABLED:-false}
+      FCM_PROJECT_ID: ${FCM_PROJECT_ID:-}
+      FCM_SERVICE_ACCOUNT_JSON: ${FCM_SERVICE_ACCOUNT_JSON:-}
 
   scheduler:
     <<: *common
