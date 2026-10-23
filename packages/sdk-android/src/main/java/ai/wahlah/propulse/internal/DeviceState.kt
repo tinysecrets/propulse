@@ -15,7 +15,7 @@ internal object DeviceState {
         put("charging", ProPulse.governor.isCharging())
         put("network", networkType(context))
         put("screen_on", screenOn(context))
-        put("doze", ProPulse.governor.isDozeMode)
+        put("doze", ProPulse.governor.isDozeMode())
     }
 
     private fun networkType(context: Context): String {
