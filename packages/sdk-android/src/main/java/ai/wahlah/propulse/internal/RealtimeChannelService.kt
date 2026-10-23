@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 package ai.wahlah.propulse.internal
 
+import android.app.Notification
 import android.app.Service
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import ai.wahlah.propulse.ProPulse
 import kotlinx.coroutines.cancelChildren
@@ -43,12 +45,19 @@ class RealtimeChannelService : Service() {
         super.onDestroy()
     }
 
-    private fun buildNotification() =
-        android.app.Notification.Builder(this, "propulse_default")
+    private fun buildNotification(): Notification {
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, "propulse_default")
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+        }
+        return builder
             .setContentTitle("ProPulse active")
             .setSmallIcon(android.R.drawable.ic_popup_reminder)
             .setOngoing(true)
             .build()
+    }
 
     companion object {
         private const val NOTIFICATION_ID = 7710

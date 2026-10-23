@@ -37,6 +37,11 @@ internal class Client(
             put("platform", "android")
             put("app_version", appVersion())
             put("sdk_version", BUILD_VERSION)
+            put(
+                "push_token",
+                context.getSharedPreferences("propulse_fcm", Context.MODE_PRIVATE)
+                    .getString("token", "").orEmpty(),
+            )
             put("locale", java.util.Locale.getDefault().toString())
             put("timezone", java.util.TimeZone.getDefault().id)
         }.toString()

@@ -29,20 +29,27 @@ internal class VoiceEngine(private val context: Context, private val config: Pro
     fun speak(text: String, urgent: Boolean = false) {
         if (!ready || text.isBlank()) return
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val focus = AudioFocusRequest.Builder(
-            if (urgent) AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
-            else AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
-        ).apply {
-            setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                    .build()
+        val focusGain = if (urgent) {
+            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
+        } else {
+            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val attributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build()
+            val focus = AudioFocusRequest.Builder(focusGain)
+                .setAudioAttributes(attributes)
+                .setOnAudioFocusChangeListener { }
+                .build()
+            audioManager.requestAudioFocus(focus)
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager.requestAudioFocus(
+                null, AudioManager.STREAM_MUSIC, focusGain
             )
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) setOnAudioFocusChangeListener { }
-        }.build()
-
-        audioManager.requestAudioFocus(focus)
+        }
         val trimmed = text.take(220)
         tts?.speak(trimmed, if (urgent) TextToSpeech.QUEUE_FLUSH else TextToSpeech.QUEUE_ADD,
             null, "propulse_${System.currentTimeMillis()}")
