@@ -1,0 +1,21 @@
+[project]
+name = "propulse-core"
+version = "1.0.0"
+description = "ProPulse AI core engine: bus, pulse FSM, security, adapters."
+license = { text = "AGPL-3.0-or-later" }
+requires-python = ">=3.11"
+dependencies = [
+  "msgspec>=0.18.6", "pymongo>=4.10", "redis>=5.2",
+  "argon2-cffi>=23.1", "pydantic-settings>=2.6", "structlog>=24.4",
+  "orjson>=3.10", "ulid-py>=1.1", "tenacity>=9.0", "httpx>=0.28",
+]
+
+[project.optional-dependencies]
+billing = ["stripe>=11.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/propulse_core"]

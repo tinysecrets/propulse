@@ -1,0 +1,32 @@
+name: chaos
+on:
+  schedule: [{ cron: "0 3 * * *" }]
+  workflow_dispatch:
+permissions: read-all
+
+jobs:
+  fault-injection:
+    runs-on: ubuntu-latest
+    services:
+      mongo: { image: mongo:7, ports: ["27017:27017"] }
+      redis: { image: redis:7-alpine, ports: ["6379:6379"] }
+      toxiproxy:
+        image: ghcr.io/shopify/toxiproxy:2.9.0
+        ports: ["8474:8474", "26379:26379"]
+    env:
+      REDIS_URL: redis://localhost:26379/0
+      MONGO_URI: mongodb://localhost:27017/propulse_chaos
+      BUS_DRIVER: redis
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --all-extras --frozen
+      - name: inject latency and partitions
+        run: uv run pytest tests/chaos -q -m chaos --chaos-profile=ci
+      - name: invariant — at-least-once must not become at-least-twice
+        run: uv run pytest tests/chaos/test_no_duplicate_notifications.py -q
+      - name: invariant — no run is orphaned past lease
+        run: uv run pytest tests/chaos/test_lease_recovery.py -q
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: chaos-traces, path: tests/chaos/artifacts/ }

@@ -1,0 +1,30 @@
+# Commercial License — Wah-Lah ProPulse AI
+
+Available to licensees who wish to use, modify and host the ProPulse AI server
+**free of the source-disclosure obligations of AGPL-3.0 section 13**, and to gain
+access to the closed-source `propulse-pro` modules.
+
+## Tiers
+
+| Tier | Fee | Scope |
+|---|---|---|
+| Single-Product Buy-Out | **USD 15,000** one-time | One commercial product or internal service. Perpetual, worldwide, non-exclusive. |
+| Unlimited Buy-Out | **USD 25,000** one-time | Unlimited products. Adds OEM / white-label redistribution. |
+| Annual renewal (optional) | USD 3,000 / 5,000 | Continued updates. Perpetual fallback licence applies after 12 / 36 months. |
+
+## Included in both tiers
+- Right to keep server modifications private.
+- Private repository access to `propulse-pro`.
+- Offline-verifiable license key (HMAC — no phone-home).
+- Commercial-appropriate warranty and liability cap.
+
+## Not included
+- The "Wah-Lah" and "ProPulse" names — see `TRADEMARK.md`.
+- Managed hosting (that is the SaaS).
+
+## How to buy
+`GET /v1/license/tiers` → `POST /v1/license/checkout` → Stripe one-time payment.
+The dual-license agreement is generated, stored and emailed automatically. Private
+repo access is granted via GitHub App within one business day.
+
+Contact: licensing@wah-lah.com

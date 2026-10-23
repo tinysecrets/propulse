@@ -1,0 +1,950 @@
+{
+  "components": {
+    "schemas": {
+      "AckBody": {
+        "properties": {
+          "channel": {
+            "default": "push",
+            "title": "Channel",
+            "type": "string"
+          },
+          "delivered_at": {
+            "default": 0.0,
+            "title": "Delivered At",
+            "type": "number"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "title": "AckBody",
+        "type": "object"
+      },
+      "DeviceRegisterBody": {
+        "properties": {
+          "app_version": {
+            "default": "",
+            "title": "App Version",
+            "type": "string"
+          },
+          "attestation": {
+            "default": "",
+            "title": "Attestation",
+            "type": "string"
+          },
+          "install_id": {
+            "title": "Install Id",
+            "type": "string"
+          },
+          "locale": {
+            "default": "en",
+            "title": "Locale",
+            "type": "string"
+          },
+          "platform": {
+            "enum": [
+              "android",
+              "ios",
+              "web",
+              "server"
+            ],
+            "title": "Platform",
+            "type": "string"
+          },
+          "push_token": {
+            "default": "",
+            "title": "Push Token",
+            "type": "string"
+          },
+          "sdk_version": {
+            "default": "",
+            "title": "Sdk Version",
+            "type": "string"
+          },
+          "timezone": {
+            "default": "UTC",
+            "title": "Timezone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "install_id",
+          "platform"
+        ],
+        "title": "DeviceRegisterBody",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "SignalBody": {
+        "properties": {
+          "client_ts": {
+            "default": 0.0,
+            "title": "Client Ts",
+            "type": "number"
+          },
+          "device_state": {
+            "additionalProperties": true,
+            "title": "Device State",
+            "type": "object"
+          },
+          "install_id": {
+            "title": "Install Id",
+            "type": "string"
+          },
+          "pulse": {
+            "title": "Pulse",
+            "type": "string"
+          },
+          "trigger": {
+            "additionalProperties": true,
+            "title": "Trigger",
+            "type": "object"
+          }
+        },
+        "required": [
+          "pulse",
+          "install_id"
+        ],
+        "title": "SignalBody",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "contact": {
+      "email": "eng@wah-lah.com",
+      "name": "Wah-Lah"
+    },
+    "description": "\n**Make any app proactive.** ProPulse is a background event-driven agent orchestrator.\n\n* `pp_pub_*` keys are embedded in app binaries and require HMAC request signing.\n* `pp_secret_*` keys are server-side and may call privileged routes.\n* Hitting a quota returns `429` with an `upgrade_url` \u2014 that is the whole billing funnel.\n\nServer is **AGPL-3.0-or-later**. `GET /source` satisfies section 13.\n",
+    "license": {
+      "name": "AGPL-3.0-or-later",
+      "url": "https://www.gnu.org/licenses/agpl-3.0.html"
+    },
+    "title": "Wah-Lah ProPulse AI",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/source": {
+      "get": {
+        "operationId": "source_source_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Source Source Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "AGPL section 13 source disclosure",
+        "tags": [
+          "license"
+        ]
+      }
+    },
+    "/v1/billing/checkout": {
+      "post": {
+        "operationId": "checkout_v1_billing_checkout_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Checkout V1 Billing Checkout Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Create a Stripe Checkout session",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/entitlements": {
+      "get": {
+        "operationId": "get_entitlements_v1_billing_entitlements_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Entitlements V1 Billing Entitlements Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Current plan, limits and usage",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/plans": {
+      "get": {
+        "operationId": "plans_v1_billing_plans_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Plans V1 Billing Plans Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Public plan catalogue",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/portal": {
+      "post": {
+        "operationId": "portal_v1_billing_portal_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Portal V1 Billing Portal Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Stripe customer portal URL",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/config": {
+      "get": {
+        "operationId": "config_v1_config_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Config V1 Config Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Public SDK configuration",
+        "tags": [
+          "config"
+        ]
+      }
+    },
+    "/v1/devices": {
+      "get": {
+        "operationId": "list_devices_v1_devices_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Devices V1 Devices Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List devices",
+        "tags": [
+          "devices"
+        ]
+      }
+    },
+    "/v1/devices/register": {
+      "post": {
+        "operationId": "register_v1_devices_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceRegisterBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Register",
+        "tags": [
+          "devices"
+        ]
+      }
+    },
+    "/v1/keys": {
+      "get": {
+        "operationId": "list_keys_v1_keys_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Keys V1 Keys Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List API keys (masked)",
+        "tags": [
+          "keys"
+        ]
+      },
+      "post": {
+        "operationId": "create_key_v1_keys_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Key V1 Keys Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Mint a key (plaintext shown once)",
+        "tags": [
+          "keys"
+        ]
+      }
+    },
+    "/v1/keys/{key_id}": {
+      "delete": {
+        "operationId": "revoke_v1_keys__key_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key_id",
+            "required": true,
+            "schema": {
+              "title": "Key Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Revoke V1 Keys  Key Id  Delete",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Revoke",
+        "tags": [
+          "keys"
+        ]
+      }
+    },
+    "/v1/keys/{key_id}/rotate": {
+      "post": {
+        "operationId": "rotate_v1_keys__key_id__rotate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key_id",
+            "required": true,
+            "schema": {
+              "title": "Key Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rotate V1 Keys  Key Id  Rotate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rotate with a dual-accept grace window",
+        "tags": [
+          "keys"
+        ]
+      }
+    },
+    "/v1/license/checkout": {
+      "post": {
+        "operationId": "license_checkout_v1_license_checkout_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response License Checkout V1 License Checkout Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Buy a commercial buy-out ($15k / $25k)",
+        "tags": [
+          "license"
+        ]
+      }
+    },
+    "/v1/license/quote": {
+      "post": {
+        "operationId": "quote_v1_license_quote_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Quote V1 License Quote Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Instant quote \u2014 no sales call",
+        "tags": [
+          "license"
+        ]
+      }
+    },
+    "/v1/license/tiers": {
+      "get": {
+        "operationId": "tiers_v1_license_tiers_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Tiers V1 License Tiers Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Commercial buy-out tiers",
+        "tags": [
+          "license"
+        ]
+      }
+    },
+    "/v1/license/verify": {
+      "post": {
+        "operationId": "verify_v1_license_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Verify V1 License Verify Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Offline-verifiable license check",
+        "tags": [
+          "license"
+        ]
+      }
+    },
+    "/v1/license/{license_id}": {
+      "get": {
+        "operationId": "get_license_v1_license__license_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "license_id",
+            "required": true,
+            "schema": {
+              "title": "License Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get License V1 License  License Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Retrieve a license and its agreement",
+        "tags": [
+          "license"
+        ]
+      }
+    },
+    "/v1/license/{license_id}/agreement": {
+      "get": {
+        "operationId": "agreement_v1_license__license_id__agreement_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "license_id",
+            "required": true,
+            "schema": {
+              "title": "License Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Agreement V1 License  License Id  Agreement Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Plain-text dual-license agreement",
+        "tags": [
+          "license"
+        ]
+      }
+    },
+    "/v1/pulses": {
+      "get": {
+        "operationId": "list_pulses_v1_pulses_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "State"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Pulses V1 Pulses Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List pulses",
+        "tags": [
+          "pulses"
+        ]
+      },
+      "post": {
+        "operationId": "create_pulse_v1_pulses_post",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Pulse V1 Pulses Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Register a pulse",
+        "tags": [
+          "pulses"
+        ]
+      }
+    },
+    "/v1/pulses/ack": {
+      "post": {
+        "operationId": "ack_v1_pulses_ack_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AckBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delivery receipt",
+        "tags": [
+          "pulses"
+        ]
+      }
+    },
+    "/v1/pulses/runs": {
+      "get": {
+        "operationId": "list_runs_v1_pulses_runs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response List Runs V1 Pulses Runs Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List recent runs",
+        "tags": [
+          "pulses"
+        ]
+      }
+    },
+    "/v1/pulses:signal": {
+      "post": {
+        "operationId": "signal_v1_pulses_signal_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignalBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Device reports a trigger fired",
+        "tags": [
+          "pulses"
+        ]
+      }
+    }
+  }
+}

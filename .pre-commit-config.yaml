@@ -1,0 +1,26 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks: [check-added-large-files, check-merge-conflict, check-yaml, check-toml,
+            end-of-file-fixer, trailing-whitespace, detect-private-key, mixed-line-ending]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.1
+    hooks: [{id: ruff, args: [--fix]}, {id: ruff-format}]
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v5.0.2
+    hooks: [{id: reuse}]
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks: [{id: gitleaks}]
+  - repo: local
+    hooks:
+      - id: license-boundary
+        name: license boundary
+        entry: uv run python scripts/check_license_boundary.py
+        language: system
+        pass_filenames: false
+      - id: env-defaults
+        name: env vars need zero-cost defaults
+        entry: uv run python scripts/check_env_defaults.py
+        language: system
+        pass_filenames: false

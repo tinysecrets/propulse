@@ -1,0 +1,13 @@
+[project]
+name = "propulse-sched"
+version = "1.0.0"
+license = { text = "AGPL-3.0-or-later" }
+requires-python = ">=3.11"
+dependencies = ["propulse-core", "structlog>=24.4"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["propulse_sched"]

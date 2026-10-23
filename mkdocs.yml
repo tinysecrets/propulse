@@ -1,0 +1,57 @@
+site_name: Wah-Lah ProPulse AI
+site_url: https://propulse.wah-lah.com
+repo_url: https://github.com/tinysecrets/propulse
+repo_name: tinysecrets/propulse
+edit_uri: edit/main/docs/
+copyright: AGPL-3.0-or-later © Wah-Lah
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: cyan
+      toggle: { icon: material/weather-sunny, name: Light }
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: cyan
+      toggle: { icon: material/weather-night, name: Dark }
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - search.suggest
+    - toc.follow
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - tables
+  - toc: { permalink: true }
+  - pymdownx.highlight: { anchor_linenums: true }
+  - pymdownx.superfences:
+      custom_fences:
+        - { name: mermaid, class: mermaid, format: pymdownx.superfences.fence_code_format }
+  - pymdownx.tabbed: { alternate_style: true }
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Architecture: architecture.md
+  - API: api-versioning.md
+  - Compliance: agpl-compliance.md
+  - Operations:
+      - Runbook: runbook.md
+      - Threat model: threat-model.md
+      - Telemetry: telemetry.md
+      - Deprecation policy: deprecation-policy.md
+  - Decisions: adr/
+  - Asset dossier: asset-dossier.md
+
+plugins:
+  - search
+  - mike

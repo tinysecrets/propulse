@@ -1,0 +1,3 @@
+-keep class ai.wahlah.propulse.** { *; }
+-keepclassmembers class ai.wahlah.propulse.internal.** { *; }
+-dontwarn okhttp3.**

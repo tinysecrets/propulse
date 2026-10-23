@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+.uv/
+*.egg-info/
+
+# Tool caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Build artifacts
+dist/
+build/
+*.whl
+*.tar.gz
+
+# JavaScript
+node_modules/
+packages/sdk-js/node_modules/
+packages/sdk-js/dist/
+
+# Android / Gradle
+.gradle/
+packages/sdk-android/.gradle/
+packages/sdk-android/**/build/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.log
+
+# Local data
+mongo-data/
+redis-data/
+sbom.spdx.json
+tests/chaos/artifacts/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/*

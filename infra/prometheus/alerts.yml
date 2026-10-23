@@ -1,0 +1,67 @@
+groups:
+  - name: propulse-slo
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(pp_requests_total{status=~"5.."}[5m]))
+          / sum(rate(pp_requests_total[5m])) > 0.02
+        for: 10m
+        labels: { severity: critical }
+        annotations: { summary: "5xx above 2% for 10m" }
+
+      - alert: SignalLatencyBurn
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(pp_request_duration_seconds_bucket{path="/v1/pulses:signal"}[5m])) by (le)
+          ) > 0.15
+        for: 15m
+        labels: { severity: warning }
+        annotations: { summary: "signal p95 above the 150ms SLO" }
+
+      - alert: GatewayDown
+        expr: up{job="propulse-api"} == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations: { summary: "api target down" }
+
+  - name: propulse-data-plane
+    rules:
+      - alert: StreamBacklog
+        expr: pp_stream_depth{group="propulse"} > 5000
+        for: 10m
+        labels: { severity: critical }
+        annotations: { summary: "event bus backlog above 5000" }
+
+      - alert: DLQGrowth
+        expr: increase(pp_dlq_total[15m]) > 50
+        for: 5m
+        labels: { severity: warning }
+        annotations: { summary: "dead letter queue growing" }
+
+      - alert: OrphanRuns
+        expr: pp_orphan_runs > 100
+        for: 10m
+        labels: { severity: warning }
+        annotations: { summary: "leases expiring faster than reclaimed" }
+
+      - alert: NoDeliveryAcks
+        expr: |
+          rate(pp_runs_completed_total[10m]) == 0
+          and rate(pp_runs_started_total[10m]) > 0
+        for: 10m
+        labels: { severity: critical }
+        annotations: { summary: "runs starting but never completing" }
+
+  - name: propulse-revenue
+    rules:
+      - alert: QuotaConversionSpike
+        expr: increase(pp_quota_exceeded_total[1h]) > 200
+        for: 5m
+        labels: { severity: info }
+        annotations: { summary: "429 spike — free tier is converting" }
+
+      - alert: StripeWebhookStalled
+        expr: increase(pp_stripe_webhook_total{status="error"}[30m]) > 10
+        for: 10m
+        labels: { severity: warning }
+        annotations: { summary: "Stripe webhooks failing — plans not upgrading" }

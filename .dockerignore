@@ -1,0 +1,5 @@
+.git .github docs/**/*.png
+**/__pycache__ **/.venv **/node_modules
+packages/sdk-android/**/build
+*.md !README.md
+mongo-data redis-data

@@ -1,0 +1,63 @@
+name: security
+on:
+  push: { branches: [main] }
+  pull_request:
+  schedule: [{ cron: "17 4 * * 1" }]
+permissions: read-all
+
+jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
+
+  deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen
+      - run: uv run pip-audit --strict
+      - uses: actions/dependency-review-action@v4
+        if: github.event_name == 'pull_request'
+        with: { fail-on-severity: high }
+
+  licenses:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --frozen
+      # no GPL/SSPL dependency may sneak into the Apache-2.0 SDKs
+      - run: uv run pip-licenses --format=csv --with-license-file > /tmp/licenses.csv
+      - run: uv run python scripts/check_dep_licenses.py /tmp/licenses.csv
+
+  images:
+    runs-on: ubuntu-latest
+    permissions: { contents: read, packages: read, security-events: write }
+    strategy: { matrix: { target: [api, worker, scheduler] } }
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --target ${{ matrix.target }} -t pp:${{ matrix.target }} .
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: pp:${{ matrix.target }}
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: true
+      - uses: anchore/sbom-action@v0
+        with: { image: pp:${{ matrix.target }} }
+
+  sbom:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anchore/sbom-action@v0
+        with:
+          format: spdx-json
+          output-file: sbom.spdx.json
+          artifact-name: sbom.spdx.json

@@ -1,0 +1,23 @@
+[project]
+name = "propulse-api"
+version = "1.0.0"
+license = { text = "AGPL-3.0-or-later" }
+requires-python = ">=3.11"
+dependencies = [
+  "propulse-core", "fastapi>=0.115", "email-validator>=2.0", "uvicorn[standard]>=0.32",
+  "msgspec>=0.18.6", "pydantic-settings>=2.6", "orjson>=3.10",
+  "structlog>=24.4", "httpx>=0.28", "prometheus-client>=0.21",
+]
+
+[project.scripts]
+propulse = "propulse_api.cli:main"
+
+[project.optional-dependencies]
+billing = ["stripe>=11.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["propulse_api"]

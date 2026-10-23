@@ -1,0 +1,31 @@
+*                                 @wah-lah/core
+
+# Open-core boundary — legal must see these
+/packages/propulse-pro/           @wah-lah/pro @wah-lah/legal
+LICENSE*                          @wah-lah/legal
+LICENSES/                         @wah-lah/legal
+CLA.md                            @wah-lah/legal
+TRADEMARK.md                      @wah-lah/legal
+LICENSE.commercial                @wah-lah/legal
+
+# Supply chain
+/.github/                         @wah-lah/platform @wah-lah/security
+/scripts/                         @wah-lah/platform
+/docker-compose.yml               @wah-lah/platform
+/Dockerfile                       @wah-lah/platform
+/deploy/                          @wah-lah/platform
+
+# Security-sensitive code
+/apps/api/propulse_api/security/   @wah-lah/security
+/apps/api/propulse_api/middleware/ @wah-lah/security
+/packages/propulse-core/security/  @wah-lah/security
+/packages/propulse-core/ratelimit/ @wah-lah/security
+
+# Public API surface
+/apps/api/propulse_api/routers/   @wah-lah/api-reviewers
+/docs/openapi.json                @wah-lah/api-reviewers
+/docs/deprecation-policy.md       @wah-lah/api-reviewers
+
+# Wire protocol
+/packages/sdk-*/                  @wah-lah/sdk-reviewers
+/docs/api-versioning.md           @wah-lah/sdk-reviewers

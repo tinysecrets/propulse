@@ -1,0 +1,106 @@
+name: propulse
+
+x-env: &env
+  ENV: ${ENV:-local}
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  SECRET_KEY: ${SECRET_KEY:-dev-only-change-me-in-production-32bytes}
+  PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
+  UPGRADE_URL: ${UPGRADE_URL:-https://propulse.wah-lah.com/upgrade}
+  MONGO_URI: mongodb://mongo:27017/propulse
+  MONGO_DB: propulse
+  REDIS_URL: redis://redis:6379/0
+  BUS_DRIVER: redis
+  STORAGE_DRIVER: fs
+  STORAGE_PATH: /var/lib/propulse/media
+  BILLING_DRIVER: ${BILLING_DRIVER:-null}
+  STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+  STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+  LLM_DRIVER: ${LLM_DRIVER:-echo}
+  TTS_DRIVER: ${TTS_DRIVER:-device}
+  RATE_LIMIT_FAIL_OPEN: "true"
+  GLOBAL_KILL: "false"
+
+x-common: &common
+  restart: unless-stopped
+  environment: *env
+  depends_on:
+    mongo: { condition: service_healthy }
+    redis: { condition: service_healthy }
+  security_opt: ["no-new-privileges:true"]
+  logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+services:
+  api:
+    <<: *common
+    build: { context: ., target: api }
+    ports: ["8080:8080"]
+    read_only: true
+    tmpfs: ["/tmp", "/var/lib/propulse"]
+
+  worker:
+    <<: *common
+    build: { context: ., target: worker }
+    environment:
+      <<: *env
+      WORKER_ROLE: orchestrator
+    deploy: { replicas: 2 }
+
+  agent:
+    <<: *common
+    build: { context: ., target: worker }
+    environment:
+      <<: *env
+      WORKER_ROLE: agent
+
+  voice:
+    <<: *common
+    build: { context: ., target: worker }
+    environment:
+      <<: *env
+      WORKER_ROLE: voice
+
+  scheduler:
+    <<: *common
+    build: { context: ., target: scheduler }
+
+  migrate:
+    <<: *common
+    build: { context: ., target: api }
+    command: ["python", "-m", "propulse_api.cli", "migrate"]
+    restart: "no"
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    command: ["--wiredTigerCacheSizeGB", "1"]
+    volumes: ["mongo-data:/data/db"]
+    ports: ["27017:27017"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ping:1}).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb",
+              "--maxmemory-policy", "noeviction"]
+    volumes: ["redis-data:/data"]
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ai"]
+    volumes: ["ollama-data:/root/.ollama"]
+    ports: ["11434:11434"]
+
+volumes:
+  mongo-data:
+  redis-data:
+  ollama-data:

@@ -1,0 +1,13 @@
+version = 1
+
+[[annotations]]
+path = ["**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Wah-Lah"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+[[annotations]]
+path = ["packages/sdk-android/**", "packages/sdk-js/**", "packages/sdk-python/**", "LICENSES/Apache-2.0.txt"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Wah-Lah"
+SPDX-License-Identifier = "Apache-2.0"

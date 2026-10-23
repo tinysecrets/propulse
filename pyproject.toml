@@ -1,0 +1,93 @@
+[project]
+name = "wah-lah-propulse"
+version = "1.0.0"
+description = "Make any app proactive. Background event-driven agent orchestrator."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "AGPL-3.0-or-later" }
+authors = [{ name = "Wah-Lah", email = "eng@wah-lah.com" }]
+keywords = ["proactive", "agent", "orchestrator", "android", "fastapi", "mongodb"]
+classifiers = [
+  "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+  "Programming Language :: Python :: 3.12",
+  "Framework :: FastAPI",
+  "Topic :: System :: Distributed Computing",
+]
+
+dependencies = [
+  "fastapi>=0.115",
+  "email-validator>=2.0",
+  "uvicorn[standard]>=0.32",
+  "msgspec>=0.18.6",
+  "pydantic-settings>=2.6",
+  "pymongo>=4.10",
+  "redis>=5.2",
+  "argon2-cffi>=23.1",
+  "httpx>=0.28",
+  "structlog>=24.4",
+  "orjson>=3.10",
+  "ulid-py>=1.1",
+  "prometheus-client>=0.21",
+  "tenacity>=9.0",
+]
+
+[project.optional-dependencies]
+billing = ["stripe>=11.0"]
+otel = ["opentelemetry-sdk>=1.29", "opentelemetry-exporter-otlp-proto-grpc>=1.29", "opentelemetry-instrumentation-fastapi>=0.50b0"]
+dev = [
+  "pytest>=8.3", "pytest-asyncio>=0.24", "pytest-cov>=6.0", "pytest-benchmark>=5.1",
+  "ruff>=0.7", "mypy>=1.13", "reuse>=5.0", "pip-audit>=2.7", "pre-commit>=4.0",
+  "testcontainers>=4.8", "toxiproxy-python>=0.1.1", "mkdocs-material>=9.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/propulse-core", "apps/*"]
+
+[tool.uv.sources]
+propulse-core = { workspace = true }
+propulse-api = { workspace = true }
+propulse-worker = { workspace = true }
+propulse-sched = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["packages/sdk-android", "packages/sdk-js"]
+
+[tool.ruff.lint]
+select = ["E","F","W","I","N","UP","B","A","C4","DTZ","T10","EM","ISC","LOG","G","PIE","PT","RET","SIM","TID","ARG","PTH","ERA","PL","RUF","S"]
+# Intentional patterns: callback-compatible unused parameters, lazy imports that avoid
+# optional-provider/circular-import costs, FastAPI Depends defaults, fail-open handling,
+# public exception names, and false-positive secret scans for key prefixes/test fixtures.
+ignore = [
+  "PLR0913", "PLR0915", "PLR2004", "PLR0911", "PLR0912", "PLR0917",
+  "EM101", "EM102", "TRY003", "ARG001", "ARG002", "PLC0415",
+  "B008", "SIM105", "S110", "S105", "S106", "N818", "LOG004",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101","ARG001","PLR2004"]
+"apps/scheduler/propulse_sched/main.py" = ["S101","S311"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = ["chaos: fault injection", "slow: >5s", "e2e: full stack"]
+filterwarnings = ["error::DeprecationWarning"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
