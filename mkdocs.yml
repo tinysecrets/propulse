@@ -44,12 +44,20 @@ nav:
   - Architecture: architecture.md
   - API: api-versioning.md
   - Compliance: agpl-compliance.md
+  - Licensing: licensing.md
   - Operations:
       - Runbook: runbook.md
       - Threat model: threat-model.md
       - Telemetry: telemetry.md
       - Deprecation policy: deprecation-policy.md
-  - Decisions: adr/
+  - Decisions:
+      - Overview: adr/index.md
+      - 0001: adr/0001-record-decisions.md
+      - 0002: adr/0002-redis-streams-over-kafka.md
+      - 0003: adr/0003-license-boundary.md
+      - 0004: adr/0004-key-format-and-hashing.md
+      - 0005: adr/0005-no-billing-dashboard.md
+      - 0006: adr/0006-headless-agpl-enforcement.md
   - Asset dossier: asset-dossier.md
 
 plugins:

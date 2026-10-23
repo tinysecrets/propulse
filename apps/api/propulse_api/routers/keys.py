@@ -4,9 +4,10 @@ from __future__ import annotations
 import time
 
 from fastapi import APIRouter
-from propulse_api.deps import Auth, Redis, Store
 from propulse_core.errors import NotFoundError
 from propulse_core.security.keys import mint_key, new_signing_secret, scopes_for
+
+from propulse_api.deps import Auth, Redis, Store
 
 router = APIRouter(prefix="/v1/keys", tags=["keys"])
 

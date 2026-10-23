@@ -6,6 +6,7 @@ from typing import Any
 
 import httpx
 import structlog
+
 from propulse_core.adapters.llm.base import Plan
 
 log = structlog.get_logger(__name__)

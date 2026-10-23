@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import structlog
+
 from propulse_core.adapters.billing.base import CheckoutResult
 from propulse_core.entitlements import PLANS
 from propulse_core.errors import ValidationError
@@ -55,7 +56,7 @@ class StripeBilling:
         session = await self._stripe.checkout.Session.create_async(
             mode="subscription",
             line_items=[{"price": self._price_for_plan(plan), "quantity": 1}],
-            customer_email=email or None,
+            customer_email=email,
             success_url=f"{success_url}?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=cancel_url,
             automatic_tax={"enabled": self._tax},
@@ -64,6 +65,8 @@ class StripeBilling:
             metadata={"tenant_id": tenant_id, "plan": plan, "kind": "subscription"},
             client_reference_id=tenant_id,
         )
+        if not session.url:
+            raise RuntimeError("Stripe returned a checkout session without a URL")
         return CheckoutResult(url=session.url, session_id=session.id, mode="subscription")
 
     async def create_license_checkout(
@@ -80,7 +83,7 @@ class StripeBilling:
         session = await self._stripe.checkout.Session.create_async(
             mode="payment",
             line_items=[{"price": self._price_for_tier(tier), "quantity": 1}],
-            customer_email=email or None,
+            customer_email=email,
             success_url=f"{success_url}?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=cancel_url,
             automatic_tax={"enabled": self._tax},
@@ -99,6 +102,8 @@ class StripeBilling:
         log.info(
             "license_checkout_created", tenant_id=tenant_id, tier=tier, amount_usd=t["price_usd"]
         )
+        if not session.url:
+            raise RuntimeError("Stripe returned a checkout session without a URL")
         return CheckoutResult(url=session.url, session_id=session.id, mode="payment")
 
     async def create_portal_session(self, customer_id: str, return_url: str) -> str:
@@ -110,7 +115,12 @@ class StripeBilling:
     async def report_usage(
         self, *, subscription_item_id: str, quantity: int, timestamp: int
     ) -> None:
-        await self._stripe.SubscriptionItem.create_usage_record_async(
+        create_usage_record_async = getattr(
+            self._stripe.SubscriptionItem, "create_usage_record_async", None
+        )
+        if create_usage_record_async is None:
+            raise RuntimeError("Installed Stripe SDK does not support async usage records")
+        await create_usage_record_async(
             subscription_item_id,
             quantity=quantity,
             timestamp=timestamp,
@@ -122,7 +132,8 @@ class StripeBilling:
             event = self._stripe.Webhook.construct_event(payload, signature, self._webhook_secret)
         except Exception as exc:
             raise ValidationError(f"invalid stripe signature: {exc}") from exc
-        return dict(event)
+        return cast(dict[str, Any], event.to_dict_recursive())
 
     async def retrieve_session(self, session_id: str) -> dict[str, Any]:
-        return dict(await self._stripe.checkout.Session.retrieve_async(session_id))
+        session = await self._stripe.checkout.Session.retrieve_async(session_id)
+        return cast(dict[str, Any], cast(Any, session).to_dict_recursive())

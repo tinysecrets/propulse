@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import structlog
-from propulse_core.bus.base import DLQ_SUFFIX, Bus
-from propulse_core.protocol import ENCODER, EventEnvelope
 from redis.asyncio import Redis
 from redis.exceptions import ResponseError
+
+from propulse_core.bus.base import DLQ_SUFFIX, Bus
+from propulse_core.protocol import ENCODER, EventEnvelope
 
 log = structlog.get_logger(__name__)
 

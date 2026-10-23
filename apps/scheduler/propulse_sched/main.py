@@ -9,9 +9,10 @@ import random
 import socket
 import time
 import uuid
+from typing import Any
 
 import structlog
-from propulse_core.bus.base import STREAMS
+from propulse_core.bus.base import STREAMS, Bus
 from propulse_core.bus.factory import make_bus
 from propulse_core.domain.states import PulseState
 from propulse_core.logging import configure_logging
@@ -34,7 +35,7 @@ class Scheduler:
         self.settings = Settings()
         self.node = f"{socket.gethostname()}-{os.getpid()}-{uuid.uuid4().hex[:6]}"
         self.store: MongoStore | None = None
-        self.bus = None
+        self.bus: Bus | None = None
         self.redis: Redis | None = None
         self.is_leader = False
 
@@ -57,7 +58,10 @@ class Scheduler:
                     self.is_leader = True
                     return
                 holder = await self.redis.get(LOCK_KEY)
-                if holder and holder.decode() == self.node:
+                if (
+                    holder
+                    and (holder.decode() if isinstance(holder, bytes) else holder) == self.node
+                ):
                     self.is_leader = True
                     return
             except Exception as exc:
@@ -70,7 +74,10 @@ class Scheduler:
             await asyncio.sleep(LOCK_TTL_MS / 3000)
             try:
                 holder = await self.redis.get(LOCK_KEY)
-                if holder and holder.decode() == self.node:
+                if (
+                    holder
+                    and (holder.decode() if isinstance(holder, bytes) else holder) == self.node
+                ):
                     await self.redis.pexpire(LOCK_KEY, LOCK_TTL_MS)
                 else:
                     self.is_leader = False
@@ -80,6 +87,7 @@ class Scheduler:
                 pass
 
     async def tick(self) -> None:
+        assert self.store is not None and self.bus is not None
         now = time.time()
         due = await self.store.due_pulses(now, limit=200)
         for pulse in due:
@@ -100,6 +108,7 @@ class Scheduler:
             log.info("scheduler_tick", due=len(due))
 
     async def reap_orphans(self) -> None:
+        assert self.store is not None
         cutoff = time.time() - LEASE_REAP_SECONDS
         orphans = await self.store.orphan_runs(cutoff, limit=100)
         for run in orphans:
@@ -115,10 +124,11 @@ class Scheduler:
 
     async def report_usage(self) -> None:
         """Push unreported usage to Stripe Meters. Local ledger is source of truth."""
+        assert self.store is not None
         rows = await self.store.unreported_usage(limit=500)
         if not rows:
             return
-        subs = {}
+        subs: dict[str, dict[str, Any]] = {}
         for row in rows:
             subs.setdefault(row["tenant_id"], row)
         log.info("usage_reportable", tenants=len(subs), rows=len(rows))
@@ -142,8 +152,10 @@ class Scheduler:
                 await asyncio.sleep(TICK_SECONDS + random.random() * 2)
         finally:
             renew.cancel()
-            await self.bus.close()
-            await self.store.close()
+            if self.bus is not None:
+                await self.bus.close()
+            if self.store is not None:
+                await self.store.close()
 
 
 async def main() -> None:

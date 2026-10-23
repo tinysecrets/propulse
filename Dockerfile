@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1.7
 
-FROM python:3.12-slim@sha256:0000000000000000000000000000000000000000000000000000000000000000 AS base
+FROM python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704 AS base
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 \
     UV_LINK_MODE=copy UV_PROJECT_ENVIRONMENT=/opt/venv
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl && rm -rf /var/lib/apt/lists/*
-COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.12.13@sha256:b485bd65cc2cf1c9a93b3554012c9c3778cf7b1b5fd3d3096ce9e1226c97e1e6 /uv /usr/local/bin/uv
 
 # ---------- builder ----------
 FROM base AS builder

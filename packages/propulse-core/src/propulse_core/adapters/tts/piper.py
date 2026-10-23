@@ -9,6 +9,7 @@ import pathlib
 import shutil
 
 import structlog
+
 from propulse_core.adapters.tts.base import Speech
 from propulse_core.adapters.tts.device import DeviceTTS
 

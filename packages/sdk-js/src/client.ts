@@ -125,7 +125,7 @@ export class ProPulse {
 
     if (body) headers["content-type"] = "application/json";
     if (this.options.secret) {
-      headers["x-pp-sig"] = sign(this.options.secret, ts, nonce, body);
+      headers["x-pp-sig"] = await sign(this.options.secret, ts, nonce, body);
     }
 
     const controller = new AbortController();

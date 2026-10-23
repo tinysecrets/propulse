@@ -4,9 +4,10 @@ from __future__ import annotations
 import time
 
 from fastapi import APIRouter
+from propulse_core.protocol import PROTOCOL_VERSION, DeviceRegisterResponse
+
 from propulse_api.deps import Auth, Redis, Store
 from propulse_api.schemas import DeviceRegisterBody
-from propulse_core.protocol import PROTOCOL_VERSION, DeviceRegisterResponse
 
 router = APIRouter(prefix="/v1/devices", tags=["devices"])
 

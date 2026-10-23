@@ -9,12 +9,12 @@ describe("ProPulse JavaScript SDK", () => {
     expect(() => new ProPulse({ key: "" })).toThrowError(ProPulseError);
   });
 
-  it("uses a deterministic canonical HMAC signature", () => {
+  it("uses a deterministic canonical HMAC signature", async () => {
     const body = '{"pulse":"cart_idle"}';
     const digest = createHash("sha256").update(body, "utf8").digest("hex");
     const expectedCanonical = `1700000000.nonce-1.${digest}`;
-    expect(canonical("1700000000", "nonce-1", body)).toBe(expectedCanonical);
-    expect(sign("secret", "1700000000", "nonce-1", body)).toBe(
+    expect(await canonical("1700000000", "nonce-1", body)).toBe(expectedCanonical);
+    expect(await sign("secret", "1700000000", "nonce-1", body)).toBe(
       createHmac("sha256", "secret").update(expectedCanonical, "utf8").digest("base64"),
     );
   });

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import time
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
@@ -15,7 +15,7 @@ PROTOCOL_VERSION = 3
 
 class ProPulseError(Exception):
     def __init__(
-        self, message: str, status: int = 0, code: str = "error", body: dict | None = None
+        self, message: str, status: int = 0, code: str = "error", body: dict[str, Any] | None = None
     ) -> None:
         super().__init__(message)
         self.status = status
@@ -63,9 +63,9 @@ class ProPulse:
         self,
         pulse: str,
         install_id: str = "server",
-        trigger: dict | None = None,
-        device_state: dict | None = None,
-    ) -> dict:
+        trigger: dict[str, Any] | None = None,
+        device_state: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         return self._request(
             "POST",
             "/v1/pulses:signal",
@@ -78,7 +78,7 @@ class ProPulse:
             },
         )
 
-    def register_device(self, install_id: str, platform: str = "server") -> dict:
+    def register_device(self, install_id: str, platform: str = "server") -> dict[str, Any]:
         return self._request(
             "POST",
             "/v1/devices/register",
@@ -89,12 +89,16 @@ class ProPulse:
             },
         )
 
-    def ack(self, run_id: str, channel: str = "server") -> dict:
+    def ack(self, run_id: str, channel: str = "server") -> dict[str, Any]:
         return self._request("POST", "/v1/pulses/ack", {"run_id": run_id, "channel": channel})
 
     def create_pulse(
-        self, key: str, trigger: dict, action: dict | None = None, policy: dict | None = None
-    ) -> dict:
+        self,
+        key: str,
+        trigger: dict[str, Any],
+        action: dict[str, Any] | None = None,
+        policy: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         return self._request(
             "POST",
             "/v1/pulses",
@@ -106,16 +110,18 @@ class ProPulse:
             },
         )
 
-    def entitlements(self) -> dict:
+    def entitlements(self) -> dict[str, Any]:
         return self._request("GET", "/v1/billing/entitlements")
 
     def upgrade_url(self, plan: str = "pro") -> str:
-        return self._request("POST", "/v1/billing/checkout", {"plan": plan})["url"]
+        return cast(str, self._request("POST", "/v1/billing/checkout", {"plan": plan})["url"])
 
-    def source_disclosure(self) -> dict:
+    def source_disclosure(self) -> dict[str, Any]:
         return self._request("GET", "/source")
 
-    def _request(self, method: str, path: str, payload: dict | None = None) -> dict:
+    def _request(
+        self, method: str, path: str, payload: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         body = json.dumps(payload, separators=(",", ":")) if payload is not None else ""
         ts = str(int(time.time()))
         nonce = new_nonce()
@@ -134,7 +140,7 @@ class ProPulse:
         resp = self._client.request(
             method, self._base + path, content=body or None, headers=headers
         )
-        parsed = resp.json() if resp.content else {}
+        parsed: dict[str, Any] = cast(dict[str, Any], resp.json() if resp.content else {})
 
         if resp.status_code == 429 and parsed.get("upgrade_url"):
             raise QuotaExceeded(

@@ -37,6 +37,8 @@ packages/sdk-android/**/build/
 *.log
 
 # Local data
+.benchmarks/
+site/
 mongo-data/
 redis-data/
 sbom.spdx.json

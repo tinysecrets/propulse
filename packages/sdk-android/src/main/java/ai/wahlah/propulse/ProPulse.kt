@@ -18,8 +18,8 @@ import kotlinx.coroutines.launch
  * Wah-Lah ProPulse AI — two-line integration.
  *
  * ```
- * ProPulse.start(this, "pp_pub_live_xxxx")
- * ProPulse.on("cart_idle").after(15.minutes).say("Still thinking? 10% off.")
+ * ProPulse.start(this, BuildConfig.PROPULSE_PUBLIC_KEY)
+ * ProPulse.on("cart_idle").after(15.minutes()).say("Still thinking? 10% off.")
  * ```
  *
  * Fails soft: no network, bad key, or missing push all degrade to no-op.

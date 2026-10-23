@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Request
-from propulse_api.deps import Auth, Billing, Store
 from propulse_core.errors import NotFoundError, ValidationError
 from propulse_core.licensing import (
     COMMERCIAL_TIERS,
     is_signed_commercial,
 )
+
+from propulse_api.deps import Auth, Billing, Store
 
 router = APIRouter(prefix="/v1/license", tags=["license"])
 

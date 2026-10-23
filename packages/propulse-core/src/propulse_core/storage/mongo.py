@@ -4,19 +4,24 @@
 from __future__ import annotations
 
 import time
-from typing import Any
+from typing import Any, cast
 
 import structlog
-from propulse_core.errors import ConflictError
 from pymongo import ASCENDING, DESCENDING, AsyncMongoClient, ReturnDocument
 from pymongo.errors import DuplicateKeyError
+
+from propulse_core.errors import ConflictError
 
 log = structlog.get_logger(__name__)
 
 
+def _as_doc(value: Any) -> dict[str, Any] | None:
+    return cast(dict[str, Any] | None, value)
+
+
 class MongoStore:
     def __init__(self, uri: str, db_name: str = "propulse", *, max_pool_size: int = 20) -> None:
-        self._client = AsyncMongoClient(
+        self._client: AsyncMongoClient[dict[str, Any]] = AsyncMongoClient(
             uri,
             maxPoolSize=max_pool_size,
             tz_aware=False,
@@ -25,14 +30,14 @@ class MongoStore:
             connectTimeoutMS=5000,
             appname="propulse",
         )
-        self._db = self._client[db_name]
+        self._db: Any = self._client[db_name]
 
     # --- plumbing ----------------------------------------------------------
     @property
-    def db(self):
+    def db(self) -> Any:
         return self._db
 
-    def col(self, name: str):
+    def col(self, name: str) -> Any:
         return self._db[name]
 
     async def connect(self) -> None:
@@ -95,13 +100,13 @@ class MongoStore:
 
     # --- tenants -----------------------------------------------------------
     async def get_tenant_by_slug(self, slug: str) -> dict[str, Any] | None:
-        return await self.col("tenants").find_one({"slug": slug})
+        return _as_doc(await self.col("tenants").find_one({"slug": slug}))
 
     async def get_tenant(self, tenant_id: str) -> dict[str, Any] | None:
-        return await self.col("tenants").find_one({"_id": tenant_id})
+        return _as_doc(await self.col("tenants").find_one({"_id": tenant_id}))
 
     async def upsert_tenant(self, doc: dict[str, Any]) -> str:
-        tid = doc.pop("_id", None) or doc["slug"]
+        tid: str = str(doc.pop("_id", None) or doc["slug"])
         await self.col("tenants").update_one(
             {"_id": tid},
             {"$set": {**doc, "_id": tid}, "$setOnInsert": {"created_at": time.time()}},
@@ -123,7 +128,7 @@ class MongoStore:
         return str(res.inserted_id)
 
     async def get_api_key(self, key_id: str) -> dict[str, Any] | None:
-        return await self.col("api_keys").find_one({"key_id": key_id})
+        return _as_doc(await self.col("api_keys").find_one({"key_id": key_id}))
 
     async def list_api_keys(self, tenant_id: str) -> list[dict[str, Any]]:
         cur = self.col("api_keys").find({"tenant_id": tenant_id}).sort("created_at", DESCENDING)
@@ -154,15 +159,15 @@ class MongoStore:
         return str(res["_id"]) if res else ""
 
     async def get_device(self, tenant_id: str, install_id: str) -> dict[str, Any] | None:
-        return await self.col("devices").find_one(
-            {"tenant_id": tenant_id, "install_id": install_id}
+        return _as_doc(
+            await self.col("devices").find_one({"tenant_id": tenant_id, "install_id": install_id})
         )
 
     async def get_device_by_id(self, device_id: str) -> dict[str, Any] | None:
         from bson import ObjectId
 
         try:
-            return await self.col("devices").find_one({"_id": ObjectId(device_id)})
+            return _as_doc(await self.col("devices").find_one({"_id": ObjectId(device_id)}))
         except Exception:
             return None
 
@@ -185,12 +190,12 @@ class MongoStore:
         from bson import ObjectId
 
         try:
-            return await self.col("pulses").find_one({"_id": ObjectId(pulse_id)})
+            return _as_doc(await self.col("pulses").find_one({"_id": ObjectId(pulse_id)}))
         except Exception:
             return None
 
     async def find_pulse(self, tenant_id: str, key: str) -> dict[str, Any] | None:
-        return await self.col("pulses").find_one({"tenant_id": tenant_id, "key": key})
+        return _as_doc(await self.col("pulses").find_one({"tenant_id": tenant_id, "key": key}))
 
     async def list_pulses(
         self, tenant_id: str, *, state: str | None = None, limit: int = 100
@@ -228,7 +233,7 @@ class MongoStore:
         from bson import ObjectId
 
         try:
-            return await self.col("pulse_runs").find_one({"_id": ObjectId(run_id)})
+            return _as_doc(await self.col("pulse_runs").find_one({"_id": ObjectId(run_id)}))
         except Exception:
             return None
 
@@ -237,18 +242,20 @@ class MongoStore:
     ) -> dict[str, Any] | None:
         from bson import ObjectId
 
-        return await self.col("pulse_runs").find_one_and_update(
-            {
-                "_id": ObjectId(run_id),
-                "state": {"$in": expected},
-                "$or": [
-                    {"lease_owner": None},
-                    {"lease_at": {"$lt": when - 30}},
-                    {"lease_owner": owner},
-                ],
-            },
-            {"$set": {"lease_owner": owner, "lease_at": when}},
-            return_document=ReturnDocument.AFTER,
+        return _as_doc(
+            await self.col("pulse_runs").find_one_and_update(
+                {
+                    "_id": ObjectId(run_id),
+                    "state": {"$in": expected},
+                    "$or": [
+                        {"lease_owner": None},
+                        {"lease_at": {"$lt": when - 30}},
+                        {"lease_owner": owner},
+                    ],
+                },
+                {"$set": {"lease_owner": owner, "lease_at": when}},
+                return_document=ReturnDocument.AFTER,
+            )
         )
 
     async def transition_run(self, run_id: str, expected: list[str], patch: dict[str, Any]) -> bool:
@@ -259,7 +266,7 @@ class MongoStore:
             {"_id": ObjectId(run_id), "state": {"$in": expected}},
             {"$set": {**patch, "updated_at": time.time()}, "$inc": {"revision": 1}},
         )
-        return res.modified_count == 1
+        return bool(res.modified_count == 1)
 
     async def update_run(self, run_id: str, patch: dict[str, Any]) -> None:
         from bson import ObjectId
@@ -297,13 +304,15 @@ class MongoStore:
         await self.col("events").insert_one(doc)
 
     async def count_events(self, tenant_id: str, since: float) -> int:
-        return await self.col("events").count_documents(
-            {"meta.tenant_id": tenant_id, "ts": {"$gte": since}}
+        return int(
+            await self.col("events").count_documents(
+                {"meta.tenant_id": tenant_id, "ts": {"$gte": since}}
+            )
         )
 
     # --- entitlements / subscription --------------------------------------
     async def get_entitlements(self, tenant_id: str) -> dict[str, Any] | None:
-        return await self.col("entitlements").find_one({"tenant_id": tenant_id})
+        return _as_doc(await self.col("entitlements").find_one({"tenant_id": tenant_id}))
 
     async def upsert_entitlements(self, tenant_id: str, doc: dict[str, Any]) -> int:
         res = await self.col("entitlements").find_one_and_update(
@@ -319,7 +328,7 @@ class MongoStore:
         return int(res.get("version", 1)) if res else 1
 
     async def get_subscription(self, tenant_id: str) -> dict[str, Any] | None:
-        return await self.col("subscriptions").find_one({"tenant_id": tenant_id})
+        return _as_doc(await self.col("subscriptions").find_one({"tenant_id": tenant_id}))
 
     async def upsert_subscription(self, tenant_id: str, doc: dict[str, Any]) -> None:
         await self.col("subscriptions").update_one(
@@ -329,7 +338,9 @@ class MongoStore:
         )
 
     async def find_subscription_by_customer(self, customer_id: str) -> dict[str, Any] | None:
-        return await self.col("subscriptions").find_one({"stripe_customer_id": customer_id})
+        return _as_doc(
+            await self.col("subscriptions").find_one({"stripe_customer_id": customer_id})
+        )
 
     # --- usage -------------------------------------------------------------
     async def bump_usage(self, tenant_id: str, metric: str, qty: int, period: str) -> int:
@@ -383,10 +394,10 @@ class MongoStore:
         return str(res.inserted_id)
 
     async def get_license(self, license_id: str) -> dict[str, Any] | None:
-        return await self.col("licenses").find_one({"license_id": license_id})
+        return _as_doc(await self.col("licenses").find_one({"license_id": license_id}))
 
     async def get_license_by_session(self, session_id: str) -> dict[str, Any] | None:
-        return await self.col("licenses").find_one({"stripe_session_id": session_id})
+        return _as_doc(await self.col("licenses").find_one({"stripe_session_id": session_id}))
 
     async def update_license(self, license_id: str, patch: dict[str, Any]) -> None:
         await self.col("licenses").update_one(

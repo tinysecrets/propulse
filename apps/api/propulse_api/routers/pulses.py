@@ -4,8 +4,6 @@ from __future__ import annotations
 import time
 
 from fastapi import APIRouter, Query, Request
-from propulse_api.deps import Auth, Billing, Bus, Entitlements, Store, TraceId
-from propulse_api.schemas import AckBody, SignalBody
 from propulse_core.domain.states import PulseState
 from propulse_core.errors import NotFoundError, QuotaExceeded
 from propulse_core.protocol import (
@@ -13,6 +11,9 @@ from propulse_core.protocol import (
     SignalResponse,
     dedupe_key,
 )
+
+from propulse_api.deps import Auth, Billing, Bus, Entitlements, Store, TraceId
+from propulse_api.schemas import AckBody, SignalBody
 
 router = APIRouter(prefix="/v1/pulses", tags=["pulses"])
 

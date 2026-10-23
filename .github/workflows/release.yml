@@ -62,7 +62,7 @@ jobs:
 
   pypi:
     needs: release-please
-    if: needs.release-please.outputs.released == 'true'
+    if: needs.release-please.outputs.released == 'true' && vars.ENABLE_PYPI_PUBLISH == 'true'
     runs-on: ubuntu-latest
     environment: pypi
     permissions: { id-token: write }
@@ -75,7 +75,7 @@ jobs:
 
   android-publish:
     needs: release-please
-    if: needs.release-please.outputs.released == 'true'
+    if: needs.release-please.outputs.released == 'true' && vars.ENABLE_ANDROID_PUBLISH == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -96,9 +96,12 @@ jobs:
     permissions: { contents: write, id-token: write, attestations: write }
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
       - uses: anchore/sbom-action@v0
         with: { format: spdx-json, output-file: sbom.spdx.json }
-      - run: ./scripts/verify-release.sh
+      - run: uv build --all-packages
+      - run: uv run python scripts/verify_wheel_license.py dist/
+      - run: test -s sbom.spdx.json && test -s docs/openapi.json
       - uses: actions/attest-build-provenance@v2
         with: { subject-path: sbom.spdx.json }
       - uses: softprops/action-gh-release@v2
@@ -111,19 +114,24 @@ jobs:
 
   deploy-staging:
     needs: [release-please, images]
-    if: needs.release-please.outputs.released == 'true'
+    if: needs.release-please.outputs.released == 'true' && vars.ENABLE_STAGING_DEPLOY == 'true'
     runs-on: ubuntu-latest
     permissions: { id-token: write, contents: read }
     environment: staging
     steps:
       - uses: actions/checkout@v4
-      - name: assume cloud role via OIDC (no static keys)
-        run: echo "configure aws/gcp OIDC here"
+      - name: Require configured deployment adapter
+        run: |
+          if [ ! -x ./scripts/deploy.sh ] || [ ! -x ./scripts/smoke.sh ]; then
+            echo "::error::Deployment is intentionally gated until a cloud provider, OIDC role, deploy adapter, and smoke checks are configured."
+            exit 1
+          fi
       - run: ./scripts/deploy.sh staging ${{ needs.release-please.outputs.version }}
       - run: ./scripts/smoke.sh https://staging.propulse.wah-lah.com
 
   promote-prod:
-    needs: deploy-staging
+    needs: [deploy-staging, release-please]
+    if: needs.release-please.outputs.released == 'true' && vars.ENABLE_PRODUCTION_DEPLOY == 'true'
     runs-on: ubuntu-latest
     environment: production
     permissions: { id-token: write, contents: read }

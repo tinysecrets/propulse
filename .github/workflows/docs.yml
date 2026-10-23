@@ -10,12 +10,15 @@ jobs:
     permissions: { contents: write, pages: write, id-token: write }
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install mkdocs-material mike
+      - name: Configure bot identity for versioned documentation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - run: mike deploy --push --update-aliases 1.0 latest
       - run: mike set-default --push latest

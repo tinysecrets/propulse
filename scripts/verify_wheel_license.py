@@ -6,7 +6,8 @@ import sys
 import zipfile
 from pathlib import Path
 
-EXPECTED = ("AGPL", "Affero")
+AGPL_EXPECTED = ("AGPL", "Affero")
+APACHE_EXPECTED = ("Apache",)
 
 
 def main() -> int:
@@ -24,8 +25,10 @@ def main() -> int:
                 problems.append(f"{wheel.name}: no METADATA")
                 continue
             text = zf.read(metadata).decode("utf-8", "replace")
-            if not any(e in text for e in EXPECTED):
-                problems.append(f"{wheel.name}: METADATA does not declare AGPL")
+            expected = APACHE_EXPECTED if wheel.name.startswith("propulse_sdk-") else AGPL_EXPECTED
+            label = "Apache-2.0" if expected is APACHE_EXPECTED else "AGPL"
+            if not any(e in text for e in expected):
+                problems.append(f"{wheel.name}: METADATA does not declare {label}")
             if not any("LICENSE" in n for n in zf.namelist()):
                 problems.append(f"{wheel.name}: no LICENSE bundled")
 
@@ -33,7 +36,7 @@ def main() -> int:
         print("\n".join(f"  x {p}" for p in problems))
         return 1
 
-    print(f"  {len(wheels)} wheel(s) declare AGPL and bundle LICENSE")
+    print(f"  {len(wheels)} wheel(s) declare their expected license and bundle LICENSE")
     return 0
 
 

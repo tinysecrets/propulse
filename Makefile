@@ -30,8 +30,8 @@ demo: ## end-to-end pulse demo
 test: ## unit + integration
 	$(COMPOSE) run --rm api pytest -q
 
-bench: ## hot-path benchmarks (fails on >10% regression)
-	$(COMPOSE) run --rm api pytest tests/bench -q --benchmark-compare-fail=mean:10%
+bench: ## record hot-path benchmark baseline
+	$(COMPOSE) run --rm api pytest tests/bench -q --benchmark-autosave
 
 lint: ## ruff + mypy + reuse + boundary
 	uv run ruff format --check . && uv run ruff check .

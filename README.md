@@ -22,8 +22,8 @@ MongoDB. Two-line integration. Boots offline with zero cloud accounts.
 ## The entire integration
 
 ```kotlin
-ProPulse.start(this, "pp_pub_live_7f3a9c2e_xxxxxxxx")                        // line 1
-ProPulse.on("cart_idle").after(15.minutes).say("Still thinking? 10% off.")   // line 2
+ProPulse.start(this, BuildConfig.PROPULSE_PUBLIC_KEY)                      // line 1
+ProPulse.on("cart_idle").after(15.minutes()).say("Still thinking? 10% off.")   // line 2
 ```
 
 That is it. No dashboard. No YAML. No cloud account. `docker compose up` and you are live.
