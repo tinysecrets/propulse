@@ -9,20 +9,22 @@ import os
 import platform
 import sys
 import time
-from typing import Any
+from collections.abc import AsyncIterator, Awaitable, Iterable
+from typing import Any, Literal, cast
 
 from propulse_core.security.keys import mint_key, new_signing_secret
 
 
-def _app():
+def _app() -> Any:
     from propulse_api.app import create_app
 
     return create_app()
 
 
-async def _store():
-    from propulse_api.settings import settings
+async def _store() -> Any:
     from propulse_core.storage.mongo import MongoStore
+
+    from propulse_api.settings import settings
 
     store = MongoStore(settings.mongo_uri, settings.mongo_db)
     await store.connect()
@@ -96,7 +98,7 @@ async def cmd_seed() -> int:
     return 0
 
 
-async def _aiter(coro):
+async def _aiter(coro: Awaitable[Iterable[dict[str, Any]]]) -> AsyncIterator[dict[str, Any]]:
     for item in await coro:
         yield item
 
@@ -107,10 +109,11 @@ async def cmd_demo() -> int:
     from propulse_core.protocol import EventEnvelope
 
     store = await _store()
-    from propulse_api.settings import settings
     from propulse_core.bus.factory import make_bus
     from propulse_core.entitlements import EntitlementService
     from propulse_core.errors import QuotaExceeded
+
+    from propulse_api.settings import settings
 
     bus = make_bus(settings.bus_driver, settings.redis_url)
     entitlements = EntitlementService(store, None, upgrade_url=settings.upgrade_url)
@@ -255,7 +258,7 @@ async def cmd_sbom() -> int:
 
 # --- key -------------------------------------------------------------------
 async def cmd_key_mint(kind: str) -> int:
-    minted = mint_key(kind if kind in ("pub", "sec") else "pub")
+    minted = mint_key(cast(Literal["pub", "sec"], kind if kind in ("pub", "sec") else "pub"))
     print(
         json.dumps(
             {

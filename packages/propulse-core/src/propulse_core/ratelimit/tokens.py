@@ -61,9 +61,10 @@ class TokenBucket:
     ) -> BucketResult:
         now_ms = int(time.time() * 1000)
         sha = await self._load()
-        if sha is not None:
+        redis_client = self._redis
+        if sha is not None and redis_client is not None:
             try:
-                allowed, remaining, retry, _ttl = await self._redis.evalsha(  # type: ignore[misc]
+                allowed, remaining, retry, _ttl = await redis_client.evalsha(
                     sha, 1, key, rate_per_sec, burst, cost, now_ms
                 )
                 return BucketResult(bool(allowed), int(remaining), int(retry), burst)

@@ -9,10 +9,12 @@ import hmac
 import ipaddress
 import socket
 import time
+from typing import Any
 from urllib.parse import urlparse
 
 import httpx
 import structlog
+
 from propulse_worker.runtime import CONSUMER_GROUP, Runtime
 
 log = structlog.get_logger(__name__)
@@ -56,7 +58,7 @@ class WebhookSender:
                 await self._deliver(evt)
                 await self.rt.bus.ack("pp:webhook.deliver", CONSUMER_GROUP, mid)
 
-    async def _deliver(self, evt) -> None:
+    async def _deliver(self, evt: Any) -> None:
         url = evt.payload.get("url", "")
         if not url or not is_safe_url(url):
             await self.rt.bus.dead_letter("pp:webhook.deliver", evt, f"unsafe url: {url}")

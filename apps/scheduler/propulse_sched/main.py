@@ -87,7 +87,8 @@ class Scheduler:
                 pass
 
     async def tick(self) -> None:
-        assert self.store is not None and self.bus is not None
+        assert self.store is not None
+        assert self.bus is not None
         now = time.time()
         due = await self.store.due_pulses(now, limit=200)
         for pulse in due:

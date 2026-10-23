@@ -5,13 +5,14 @@ import logging
 import sys
 
 import structlog
+from structlog.typing import Processor
 
 
 def configure_logging(level: str = "info", *, json_logs: bool = True) -> None:
     logging.basicConfig(
         format="%(message)s", stream=sys.stdout, level=getattr(logging, level.upper(), logging.INFO)
     )
-    processors = [
+    processors: list[Processor] = [
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso", utc=True),

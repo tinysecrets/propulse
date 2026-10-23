@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from __future__ import annotations
 
+from typing import Any, cast
+
 import structlog
 from redis.asyncio import Redis
 from redis.exceptions import ResponseError
@@ -58,8 +60,10 @@ class RedisStreamsBus(Bus):
             await self._redis.xack(stream, group, *ids)
 
     async def dead_letter(self, stream: str, evt: EventEnvelope, reason: str) -> None:
-        payload = {"e": ENCODER.encode(evt), "reason": reason}
-        await self._redis.xadd(stream + DLQ_SUFFIX, payload, maxlen=100_000, approximate=True)
+        payload: dict[str, bytes | str] = {"e": ENCODER.encode(evt), "reason": reason}
+        await self._redis.xadd(
+            stream + DLQ_SUFFIX, cast(Any, payload), maxlen=100_000, approximate=True
+        )
         log.warning(
             "dead_letter", stream=stream, event_type=evt.type, event_id=evt.id, reason=reason
         )
@@ -88,11 +92,13 @@ class RedisStreamsBus(Bus):
         return raw.decode() if isinstance(raw, bytes) else str(raw)
 
     @staticmethod
-    def _evt(fields: dict) -> EventEnvelope:
+    def _evt(fields: dict[bytes | str, Any]) -> EventEnvelope:
         raw = fields.get(b"e") or fields.get("e")
+        if not isinstance(raw, (bytes, str)):
+            raise ValueError("Redis stream event has no valid payload")
         return msgspec_decode(raw)
 
-    def _decode(self, res) -> list[tuple[str, EventEnvelope]]:
+    def _decode(self, res: Any) -> list[tuple[str, EventEnvelope]]:
         out: list[tuple[str, EventEnvelope]] = []
         for _stream, entries in res or []:
             for msg_id, fields in entries:

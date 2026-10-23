@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 import hashlib
+from typing import Any
 
-from starlette.types import ASGIApp, Receive, Scope, Send
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 IDEMPOTENT_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 TTL_SECONDS = 86_400
@@ -52,9 +53,9 @@ class IdempotencyMiddleware:
             await send({"type": "http.response.body", "body": record["body"]})
             return
 
-        captured: dict = {"status": 500, "headers": {}, "body": b""}
+        captured: dict[str, Any] = {"status": 500, "headers": {}, "body": b""}
 
-        async def capture_send(message) -> None:
+        async def capture_send(message: Message) -> None:
             if message["type"] == "http.response.start":
                 captured["status"] = message["status"]
                 captured["headers"] = {

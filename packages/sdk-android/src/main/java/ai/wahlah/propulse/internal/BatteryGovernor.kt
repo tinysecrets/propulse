@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package ai.wahlah.propulse.internal
 
+import ai.wahlah.propulse.ProPulse
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter

@@ -45,7 +45,7 @@ def main() -> int:
     asyncio.set_event_loop(loop)
     stop = asyncio.Event()
 
-    def _stop(*_):
+    def _stop(*_args: object) -> None:
         stop.set()
 
     for sig in (signal.SIGTERM, signal.SIGINT):

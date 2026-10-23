@@ -4,6 +4,8 @@ package ai.wahlah.propulse.internal
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import ai.wahlah.propulse.ProPulse
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -36,7 +38,7 @@ class RealtimeChannelService : Service() {
     }
 
     override fun onDestroy() {
-        scope.coroutineContext[SupervisorJob()]
+        scope.coroutineContext.cancelChildren()
         stopForeground(STOP_FOREGROUND_REMOVE)
         super.onDestroy()
     }

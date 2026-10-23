@@ -10,6 +10,7 @@ from typing import Any
 import structlog
 from propulse_core.domain.states import PulseState
 from propulse_core.protocol import EventEnvelope
+
 from propulse_worker.runtime import CONSUMER_GROUP, Runtime
 
 log = structlog.get_logger(__name__)
@@ -59,7 +60,7 @@ class Agent:
         finally:
             await self.rt.bus.ack("pp:agent.plan", CONSUMER_GROUP, msg_id)
 
-    async def _plan_and_act(self, run: dict, evt: EventEnvelope) -> None:
+    async def _plan_and_act(self, run: dict[str, Any], evt: EventEnvelope) -> None:
         run_id = str(run["_id"])
         policy = run.get("policy") or {}
         budget_ms = int(policy.get("budget_ms", 8000))
@@ -152,7 +153,7 @@ class Agent:
             ms=int(budget_ms - (deadline - time.monotonic()) * 1000),
         )
 
-    async def _invoke(self, name: str, args: dict, run: dict) -> dict[str, Any]:
+    async def _invoke(self, name: str, args: dict[str, Any], run: dict[str, Any]) -> dict[str, Any]:
         """Deterministic local implementations. Swap for HTTP tools via registry."""
         if name == "get_cart":
             return {"items": 2, "value_usd": 84.0, "idle_minutes": 16}

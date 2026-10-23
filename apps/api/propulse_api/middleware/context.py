@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import time
 import uuid
+from typing import Any
 
 import structlog
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
@@ -69,7 +70,7 @@ class RequestContextMiddleware:
             structlog.contextvars.unbind_contextvars("trace_id", "path")
 
     @staticmethod
-    async def _reject(send: Send, err, trace_id: str) -> None:
+    async def _reject(send: Send, err: Any, trace_id: str) -> None:
         import orjson
 
         payload = orjson.dumps(err.to_problem(trace_id))

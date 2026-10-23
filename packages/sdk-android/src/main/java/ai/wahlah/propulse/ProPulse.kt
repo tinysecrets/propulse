@@ -6,6 +6,7 @@ import android.content.Context
 import ai.wahlah.propulse.internal.BatteryGovernor
 import ai.wahlah.propulse.internal.Client
 import ai.wahlah.propulse.internal.PulseRegistry
+import ai.wahlah.propulse.internal.ProPulseInitProvider
 import ai.wahlah.propulse.internal.PulseScheduler
 import ai.wahlah.propulse.internal.SigningKey
 import ai.wahlah.propulse.internal.VoiceEngine

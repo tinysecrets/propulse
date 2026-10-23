@@ -317,11 +317,10 @@ class MongoStore:
     async def upsert_entitlements(self, tenant_id: str, doc: dict[str, Any]) -> int:
         res = await self.col("entitlements").find_one_and_update(
             {"tenant_id": tenant_id},
-            {
-                "$set": {**doc, "tenant_id": tenant_id, "updated_at": time.time()},
-                "$inc": {"version": 1},
-                "$setOnInsert": {"version": 0},
-            },
+            [
+                {"$set": {**doc, "tenant_id": tenant_id, "updated_at": time.time()}},
+                {"$set": {"version": {"$add": [{"$ifNull": ["$version", 0]}, 1]}}},
+            ],
             upsert=True,
             return_document=ReturnDocument.AFTER,
         )

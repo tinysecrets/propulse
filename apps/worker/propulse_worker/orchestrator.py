@@ -5,10 +5,12 @@ from __future__ import annotations
 
 import asyncio
 import time
+from typing import Any
 
 import structlog
 from propulse_core.domain.states import PulseState, advance
 from propulse_core.protocol import EventEnvelope
+
 from propulse_worker.runtime import CONSUMER_GROUP, Runtime, renew_lease
 
 log = structlog.get_logger(__name__)
@@ -102,7 +104,7 @@ class Orchestrator:
             stop.set()
             lease.cancel()
 
-    async def _drive(self, run: dict, evt: EventEnvelope) -> None:
+    async def _drive(self, run: dict[str, Any], evt: EventEnvelope) -> None:
         run_id = str(run["_id"])
         policy = run.get("policy") or {}
 
@@ -147,7 +149,7 @@ class Orchestrator:
         log.info("handed_off_to_agent", run_id=run_id, pulse=run.get("pulse_key"))
 
     async def _transition(
-        self, run_id: str, current: PulseState, target: PulseState, extra: dict
+        self, run_id: str, current: PulseState, target: PulseState, extra: dict[str, Any]
     ) -> None:
         advance(current, target)
         ok = await self.rt.store.transition_run(
@@ -156,22 +158,22 @@ class Orchestrator:
         if not ok:
             log.debug("transition_noop", run_id=run_id, current=current.value)
 
-    def _in_quiet_hours(self, policy: dict) -> bool:
+    def _in_quiet_hours(self, policy: dict[str, Any]) -> bool:
         start, end = policy.get("quiet_hours_start"), policy.get("quiet_hours_end")
         if start is None or end is None:
             return False
         hour = time.localtime().tm_hour
-        return hour >= start or hour < end if start > end else start <= hour < end
+        return bool(hour >= start or hour < end if start > end else start <= hour < end)
 
-    async def _over_daily_cap(self, run: dict) -> bool:
+    async def _over_daily_cap(self, run: dict[str, Any]) -> bool:
         cap = int((run.get("policy") or {}).get("max_per_day", 5))
         since = time.time() - 86_400
         count = await self.rt.store.col("notifications").count_documents(
             {"tenant_id": run["tenant_id"], "ack_at": {"$gte": since}}
         )
-        return count >= cap
+        return bool(count >= cap)
 
-    async def _on_error(self, run: dict, evt: EventEnvelope, exc: Exception) -> None:
+    async def _on_error(self, run: dict[str, Any], evt: EventEnvelope, exc: Exception) -> None:
         run_id = str(run["_id"])
         attempts = int(run.get("attempts", 0)) + 1
         log.warning("run_failed", run_id=run_id, attempts=attempts, error=str(exc))

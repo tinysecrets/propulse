@@ -2,6 +2,7 @@
 package ai.wahlah.propulse.internal
 
 import android.content.Context
+import ai.wahlah.propulse.ProPulse
 import ai.wahlah.propulse.ProPulseConfig
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy

@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, Request
 from propulse_core.errors import NotFoundError, ValidationError
 from propulse_core.licensing import (
@@ -18,7 +20,6 @@ async def license_checkout(
     request: Request,
     principal: Auth,
     billing: Billing,
-    settings=__import__("fastapi").Depends(lambda: None),
 ) -> dict[str, object]:
     body = await request.json()
     tier = body.get("tier", "single")
@@ -74,7 +75,7 @@ async def get_license(license_id: str, principal: Auth, store: Store) -> dict[st
 
 
 @router.post("/verify", summary="Offline-verifiable license check")
-async def verify(body: dict) -> dict[str, object]:
+async def verify(body: dict[str, Any]) -> dict[str, object]:
     key = body.get("license_key", "")
     import os
 

@@ -8,6 +8,16 @@ import structlog
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import ORJSONResponse
+from propulse_core import __version__
+from propulse_core.adapters.billing.factory import make_billing
+from propulse_core.bus.factory import make_bus
+from propulse_core.entitlements import EntitlementService
+from propulse_core.errors import ProPulseError
+from propulse_core.logging import configure_logging
+from propulse_core.ratelimit.tokens import TokenBucket
+from propulse_core.storage.mongo import MongoStore
+from redis.asyncio import Redis
+
 from propulse_api.middleware.auth import AuthMiddleware
 from propulse_api.middleware.context import RequestContextMiddleware
 from propulse_api.middleware.idempotency import IdempotencyMiddleware
@@ -27,15 +37,6 @@ from propulse_api.routers import (
     license as license_router,
 )
 from propulse_api.settings import Settings
-from propulse_core import __version__
-from propulse_core.adapters.billing.factory import make_billing
-from propulse_core.bus.factory import make_bus
-from propulse_core.entitlements import EntitlementService
-from propulse_core.errors import ProPulseError
-from propulse_core.logging import configure_logging
-from propulse_core.ratelimit.tokens import TokenBucket
-from propulse_core.storage.mongo import MongoStore
-from redis.asyncio import Redis
 
 log = structlog.get_logger(__name__)
 
@@ -121,11 +122,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.include_router(r.router)
 
     @app.exception_handler(ProPulseError)
-    async def _propulse_error(request: Request, exc: ProPulseError):
+    async def _propulse_error(request: Request, exc: ProPulseError) -> ORJSONResponse:
         trace_id = getattr(request.state, "trace_id", "")
         headers: dict[str, str] = {}
-        if getattr(exc, "retry_after", None):
-            headers["retry-after"] = str(exc.retry_after)
+        retry_after = getattr(exc, "retry_after", None)
+        if retry_after:
+            headers["retry-after"] = str(retry_after)
         if isinstance(exc, type(exc)) and hasattr(exc, "upgrade_url"):
             headers["x-pp-upgrade-url"] = getattr(exc, "upgrade_url", "")
         return ORJSONResponse(
@@ -136,7 +138,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
 
     @app.exception_handler(RequestValidationError)
-    async def _validation(request: Request, exc: RequestValidationError):
+    async def _validation(request: Request, exc: RequestValidationError) -> ORJSONResponse:
         trace_id = getattr(request.state, "trace_id", "")
         return ORJSONResponse(
             {
@@ -152,7 +154,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
 
     @app.exception_handler(Exception)
-    async def _unhandled(request: Request, exc: Exception):
+    async def _unhandled(request: Request, exc: Exception) -> ORJSONResponse:
         trace_id = getattr(request.state, "trace_id", "")
         log.exception("unhandled", trace_id=trace_id)
         return ORJSONResponse(

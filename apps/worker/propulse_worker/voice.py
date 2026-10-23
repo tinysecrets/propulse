@@ -5,11 +5,13 @@ from __future__ import annotations
 
 import asyncio
 import time
+from typing import Any
 
 import structlog
 from propulse_core.coalesce import coalesce
 from propulse_core.domain.states import PulseState
 from propulse_core.protocol import EventEnvelope
+
 from propulse_worker.runtime import CONSUMER_GROUP, Runtime
 
 log = structlog.get_logger(__name__)
@@ -20,7 +22,7 @@ COALESCE_WINDOW_MS = 1500
 class VoiceDispatcher:
     def __init__(self, runtime: Runtime) -> None:
         self.rt = runtime
-        self._pending: dict[str, list[dict]] = {}
+        self._pending: dict[str, list[dict[str, Any]]] = {}
 
     async def run(self) -> None:
         self.rt.install_signals()
@@ -53,7 +55,7 @@ class VoiceDispatcher:
             except Exception as exc:
                 log.exception("dispatch_failed", device=device_key, error=str(exc))
 
-    async def _dispatch(self, device_key: str, items: list[dict]) -> None:
+    async def _dispatch(self, device_key: str, items: list[dict[str, Any]]) -> None:
         items.sort(
             key=lambda i: {"urgent": 0, "high": 1, "normal": 2, "low": 3}.get(
                 i.get("priority", "normal"), 2

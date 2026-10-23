@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import time
+from typing import Any
 
 from fastapi import APIRouter, Query, Request
 from propulse_core.domain.states import PulseState
@@ -198,7 +199,7 @@ async def list_runs(
     return {"data": [_ser(r) for r in runs], "count": len(runs)}
 
 
-def _ser(doc: dict) -> dict:
+def _ser(doc: dict[str, Any]) -> dict[str, Any]:
     out = dict(doc)
     out["id"] = str(out.pop("_id", ""))
     return out

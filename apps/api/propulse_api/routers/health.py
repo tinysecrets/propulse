@@ -36,4 +36,5 @@ async def metrics(request: Request) -> Response:
     from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
     registry = getattr(request.app.state, "metrics_registry", None)
-    return Response(content=generate_latest(registry), media_type=CONTENT_TYPE_LATEST)
+    payload = generate_latest() if registry is None else generate_latest(registry)
+    return Response(content=payload, media_type=CONTENT_TYPE_LATEST)

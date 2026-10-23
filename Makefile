@@ -35,7 +35,7 @@ bench: ## record hot-path benchmark baseline
 
 lint: ## ruff + mypy + reuse + boundary
 	uv run ruff format --check . && uv run ruff check .
-	uv run mypy --strict packages apps
+	./scripts/typecheck.sh
 	uv run reuse lint
 	uv run python scripts/check_license_boundary.py
 	uv run python scripts/check_env_defaults.py

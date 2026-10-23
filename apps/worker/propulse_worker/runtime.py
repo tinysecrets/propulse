@@ -71,7 +71,7 @@ class Runtime:
 
 
 async def renew_lease(
-    store, run_id: str, owner: str, stop: asyncio.Event, interval: float = 10.0
+    store: Any, run_id: str, owner: str, stop: asyncio.Event, interval: float = 10.0
 ) -> None:
     while not stop.is_set():
         await asyncio.sleep(interval)

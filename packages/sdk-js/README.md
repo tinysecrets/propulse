@@ -1,4 +1,4 @@
-# @wah-lah/propulse
+# @tinysecrets/propulse
 
 Apache-2.0 JavaScript/TypeScript client for the ProPulse API.
 

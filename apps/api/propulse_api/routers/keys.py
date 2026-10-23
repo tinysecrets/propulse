@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import time
+from typing import Any, Literal, cast
 
 from fastapi import APIRouter
 from propulse_core.errors import NotFoundError
@@ -36,13 +37,17 @@ async def list_keys(principal: Auth, store: Store) -> dict[str, object]:
 
 @router.post("", status_code=201, summary="Mint a key (plaintext shown once)")
 async def create_key(
-    body: dict, principal: Auth, store: Store, settings=__import__("fastapi").Depends(lambda: None)
+    body: dict[str, Any],
+    principal: Auth,
+    store: Store,
 ) -> dict[str, object]:
     principal.require("key:write")
     kind = body.get("kind", "pub")
     if kind not in ("pub", "sec"):
         kind = "pub"
-    minted = mint_key(kind, env="live" if body.get("live", True) else "test")
+    minted = mint_key(
+        cast(Literal["pub", "sec"], kind), env="live" if body.get("live", True) else "test"
+    )
     signing_secret = new_signing_secret() if kind == "pub" else ""
 
     await store.create_api_key(

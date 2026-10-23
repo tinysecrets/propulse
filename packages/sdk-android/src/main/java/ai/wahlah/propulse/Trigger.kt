@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package ai.wahlah.propulse
 
+import ai.wahlah.propulse.internal.PulseRegistry
+import ai.wahlah.propulse.internal.RegisteredPulse
+
 sealed class Trigger(val key: String, val kind: String) {
 
     abstract fun toMap(): Map<String, Any?>

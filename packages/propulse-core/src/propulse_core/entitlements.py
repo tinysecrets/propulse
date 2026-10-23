@@ -7,7 +7,7 @@ import json
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 import structlog
 
@@ -155,7 +155,7 @@ class Entitlements:
 class EntitlementService:
     """Cache keyed by tenant; invalidated by version bump. No thundering herd."""
 
-    def __init__(self, store, redis=None, *, upgrade_url: str = "") -> None:
+    def __init__(self, store: Any, redis: Any = None, *, upgrade_url: str = "") -> None:
         self._store = store
         self._redis = redis
         self._upgrade_url = upgrade_url
@@ -170,7 +170,7 @@ class EntitlementService:
             try:
                 raw = await self._redis.get(f"pp:ent:{tenant_id}")
                 if raw:
-                    return json.loads(raw)
+                    return cast(dict[str, Any], json.loads(raw))
             except Exception:
                 pass
         hit = self._mem.get(tenant_id)

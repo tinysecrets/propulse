@@ -21,8 +21,8 @@ Handler = Callable[..., Awaitable[None]]
 
 
 async def _apply_plan(
-    store,
-    entitlements,
+    store: Any,
+    entitlements: Any,
     *,
     tenant_id: str,
     plan: str,
@@ -74,7 +74,7 @@ async def _apply_plan(
 
 
 async def on_checkout_completed(
-    obj: dict[str, Any], *, store, entitlements, billing, event
+    obj: dict[str, Any], *, store: Any, entitlements: Any, billing: Any, event: dict[str, Any]
 ) -> None:
     meta = obj.get("metadata") or {}
     tenant_id = meta.get("tenant_id") or obj.get("client_reference_id", "")
@@ -104,7 +104,13 @@ async def on_checkout_completed(
 
 
 async def _issue_license(
-    obj: dict[str, Any], *, store, tenant_id: str, tier: str, licensee: str, event
+    obj: dict[str, Any],
+    *,
+    store: Any,
+    tenant_id: str,
+    tier: str,
+    licensee: str,
+    event: dict[str, Any],
 ) -> None:
     from propulse_core.licensing import COMMERCIAL_TIERS as TIERS
 
@@ -177,7 +183,7 @@ async def _issue_license(
 
 
 async def on_subscription_updated(
-    obj: dict[str, Any], *, store, entitlements, billing, event
+    obj: dict[str, Any], *, store: Any, entitlements: Any, billing: Any, event: dict[str, Any]
 ) -> None:
     customer_id = obj.get("customer", "")
     sub = await store.find_subscription_by_customer(customer_id)
@@ -206,7 +212,7 @@ async def on_subscription_updated(
 
 
 async def on_subscription_deleted(
-    obj: dict[str, Any], *, store, entitlements, billing, event
+    obj: dict[str, Any], *, store: Any, entitlements: Any, billing: Any, event: dict[str, Any]
 ) -> None:
     customer_id = obj.get("customer", "")
     sub = await store.find_subscription_by_customer(customer_id)
@@ -224,7 +230,9 @@ async def on_subscription_deleted(
     )
 
 
-async def on_payment_failed(obj: dict[str, Any], *, store, entitlements, billing, event) -> None:
+async def on_payment_failed(
+    obj: dict[str, Any], *, store: Any, entitlements: Any, billing: Any, event: dict[str, Any]
+) -> None:
     customer_id = obj.get("customer", "")
     sub = await store.find_subscription_by_customer(customer_id)
     if sub is None:
@@ -240,7 +248,9 @@ async def on_payment_failed(obj: dict[str, Any], *, store, entitlements, billing
     await store.audit({"tenant_id": sub["tenant_id"], "action": "payment_failed", "grace_days": 7})
 
 
-async def on_invoice_paid(obj: dict[str, Any], *, store, entitlements, billing, event) -> None:
+async def on_invoice_paid(
+    obj: dict[str, Any], *, store: Any, entitlements: Any, billing: Any, event: dict[str, Any]
+) -> None:
     customer_id = obj.get("customer", "")
     sub = await store.find_subscription_by_customer(customer_id)
     if sub is None:
