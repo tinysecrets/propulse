@@ -369,6 +369,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#optional-android-push-delivery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional Android push delivery
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#verify" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -997,6 +1008,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#optional-android-push-delivery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional Android push delivery
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#verify" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1042,6 +1064,15 @@
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>make<span class="w"> </span>demo
 </code></pre></div>
 <p>The <code>.env.example</code> file documents supported defaults. Keep real credentials in a local, untracked <code>.env</code> file or a secret manager; never commit them.</p>
+<h2 id="optional-android-push-delivery">Optional Android push delivery<a class="headerlink" href="#optional-android-push-delivery" title="Permanent link">&para;</a></h2>
+<p>The local stack remains cloud-free by default. The voice worker sends Android data messages through Firebase Cloud Messaging HTTP v1 only when <code>FCM_ENABLED=true</code> and a service account is configured. The worker uses the service-account credential to obtain short-lived OAuth access tokens; it never logs the credential or device token.</p>
+<ol>
+<li>Add Firebase to the consuming Android application, include its <code>google-services.json</code>, apply the Google Services Gradle plugin, and verify that FCM registration yields a device token. See the <a href="https://firebase.google.com/docs/android/setup">official Firebase Android setup</a> and <a href="https://firebase.google.com/docs/cloud-messaging/android/receive-messages">FCM receive-message guide</a>.</li>
+<li>In the Firebase/Google Cloud project, enable Firebase Cloud Messaging API and create a service account with the minimum role required to send FCM messages. Keep its JSON private. Do not place it in Git, an Android app, an image, or a log.</li>
+<li>Configure the voice-worker environment only: <code>FCM_ENABLED=true</code>, <code>FCM_PROJECT_ID</code>, and <code>FCM_SERVICE_ACCOUNT_JSON</code>. For local Compose, put the compact single-line JSON in the untracked <code>.env</code> file or use a secrets manager/Compose override to inject it only into the <code>voice</code> service. Do not set this secret on the API, scheduler, or agent containers.</li>
+<li>Rebuild/restart the voice worker after the secret is configured. Register the Android device again so the FCM token is saved; send a test pulse and verify delivery/acknowledgement in the worker logs and notification record.</li>
+</ol>
+<p>Without the Firebase app configuration and project credentials, FCM delivery deliberately remains disabled. Android local notifications and on-device speech still compile and are covered by the Android SDK test suite.</p>
 <h2 id="verify">Verify<a class="headerlink" href="#verify" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>make<span class="w"> </span><span class="nb">test</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>make<span class="w"> </span>lint
