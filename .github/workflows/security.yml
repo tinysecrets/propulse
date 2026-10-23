@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv sync --frozen
+      - run: uv sync --all-packages --all-extras --frozen
       - run: uv run pip-audit --strict
       - uses: actions/dependency-review-action@v4
         if: github.event_name == 'pull_request'
@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv sync --frozen
+      - run: uv sync --all-packages --all-extras --frozen
       # no GPL/SSPL dependency may sneak into the Apache-2.0 SDKs
       - run: uv run pip-licenses --format=csv --with-license-file > /tmp/licenses.csv
       - run: uv run python scripts/check_dep_licenses.py /tmp/licenses.csv
@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker build --target ${{ matrix.target }} -t pp:${{ matrix.target }} .
-      - uses: aquasecurity/trivy-action@0.28.0
+      - uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: pp:${{ matrix.target }}
           severity: HIGH,CRITICAL

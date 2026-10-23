@@ -36,7 +36,7 @@ billing = ["stripe>=11.0"]
 otel = ["opentelemetry-sdk>=1.29", "opentelemetry-exporter-otlp-proto-grpc>=1.29", "opentelemetry-instrumentation-fastapi>=0.50b0"]
 dev = [
   "pytest>=8.3", "pytest-asyncio>=0.24", "pytest-cov>=6.0", "pytest-benchmark>=5.1",
-  "ruff>=0.7", "mypy>=1.13", "reuse>=5.0", "pip-audit>=2.7", "pre-commit>=4.0",
+  "ruff>=0.7", "mypy>=1.13", "reuse>=5.0", "pip-audit>=2.7", "pip-licenses>=5.0", "pre-commit>=4.0",
   "testcontainers>=4.8", "toxiproxy-python>=0.1.1", "mkdocs-material>=9.5", "mike>=2.1",
 ]
 
