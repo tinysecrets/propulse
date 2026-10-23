@@ -6,8 +6,37 @@ import csv
 import sys
 from pathlib import Path
 
-BLOCKED = ("GPL", "SSPL", "BSL", "Commons Clause", "Elastic License")
-ALLOWED_PREFIXES = ("MIT", "Apache", "BSD", "ISC", "PSF", "Python", "MPL", "Unlicense", "CC0")
+BLOCKED = (
+    "GPL",
+    "GNU GENERAL PUBLIC LICENSE",
+    "SSPL",
+    "SERVER SIDE PUBLIC LICENSE",
+    "BSL",
+    "BUSINESS SOURCE LICENSE",
+    "COMMONS CLAUSE",
+    "ELASTIC LICENSE",
+)
+ALLOWED_PREFIXES = (
+    "MIT",
+    "Apache",
+    "BSD",
+    "3-Clause BSD License",
+    "ISC",
+    "PSF",
+    "Python",
+    "MPL",
+    "Mozilla Public License",
+    "Unlicense",
+    "The Unlicense",
+    "CC0",
+)
+WORKSPACE_PACKAGES = {
+    "propulse-api",
+    "propulse-worker",
+    "propulse-sched",
+    "propulse-core",
+    "propulse-sdk",
+}
 
 
 def main() -> int:
@@ -20,11 +49,16 @@ def main() -> int:
         for row in csv.DictReader(fh):
             license_name = (row.get("License") or "").strip()
             package = (row.get("Name") or "").strip()
+            # Local workspace projects have their own REUSE/license-boundary checks;
+            # this audit is for third-party dependencies only.
+            if package.lower() in WORKSPACE_PACKAGES:
+                continue
             if not license_name:
                 continue
-            if any(b in license_name for b in BLOCKED):
+            normalized = license_name.upper()
+            if any(b in normalized for b in BLOCKED):
                 offenders.append(f"{package}: {license_name}")
-            elif not any(license_name.startswith(p) for p in ALLOWED_PREFIXES):
+            elif not any(normalized.startswith(p.upper()) for p in ALLOWED_PREFIXES):
                 offenders.append(f"{package}: {license_name} (unclassified)")
 
     if offenders:

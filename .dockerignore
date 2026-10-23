@@ -1,5 +1,25 @@
-.git .github docs/**/*.png
-**/__pycache__ **/.venv **/node_modules
-packages/sdk-android/**/build
-*.md !README.md
-mongo-data redis-data
+.git
+.github
+.venv
+**/.venv
+.uv
+**/node_modules
+packages/sdk-js
+packages/sdk-android
+docs
+tests
+site
+dist
+build
+**/dist
+**/build
+**/__pycache__
+**/.mypy_cache
+**/.ruff_cache
+**/.pytest_cache
+.coverage
+coverage.xml
+*.py[cod]
+*.log
+mongo-data
+redis-data

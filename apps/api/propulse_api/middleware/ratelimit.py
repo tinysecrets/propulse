@@ -8,7 +8,16 @@ from propulse_core.ratelimit.tokens import route_cost
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 PUBLIC_PATHS = frozenset(
-    {"/healthz", "/readyz", "/metrics", "/source", "/v1/plans", "/v1/license/tiers"}
+    {
+        "/healthz",
+        "/readyz",
+        "/metrics",
+        "/source",
+        "/v1/plans",
+        "/v1/billing/plans",
+        "/v1/license/tiers",
+        "/v1/entitlements/tiers",
+    }
 )
 
 

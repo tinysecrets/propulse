@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
+from propulse_core.entitlements import PLANS
 from propulse_core.licensing import COMMERCIAL_TIERS, SourceDisclosure, source_fingerprint
 
 router = APIRouter(tags=["license"])
@@ -38,4 +39,25 @@ async def tiers() -> dict[str, object]:
             "your server modifications private, buy a commercial buy-out."
         ),
         "contact": "licensing@wah-lah.com",
+    }
+
+
+@router.get("/v1/entitlements/tiers", summary="Public entitlement plan catalog")
+async def entitlement_tiers() -> dict[str, object]:
+    """Return public plan limits and features without requiring API-key authentication."""
+    return {
+        "currency": "USD",
+        "billing_period": "month",
+        "plans": [
+            {
+                "id": plan.id,
+                "name": plan.name,
+                "price_usd": plan.price_usd,
+                "monthly_pulses": plan.monthly_pulses,
+                "rate_limit_per_min": plan.rate_limit_per_min,
+                "features": sorted(plan.features),
+                "overage_allowed": plan.overage_allowed,
+            }
+            for plan in PLANS.values()
+        ],
     }

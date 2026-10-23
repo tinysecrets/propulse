@@ -381,6 +381,30 @@
         ]
       }
     },
+    "/v1/entitlements/tiers": {
+      "get": {
+        "description": "Return public plan limits and features without requiring API-key authentication.",
+        "operationId": "entitlement_tiers_v1_entitlements_tiers_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Entitlement Tiers V1 Entitlements Tiers Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Public entitlement plan catalog",
+        "tags": [
+          "license"
+        ]
+      }
+    },
     "/v1/keys": {
       "get": {
         "operationId": "list_keys_v1_keys_get",

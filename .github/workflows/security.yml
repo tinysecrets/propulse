@@ -20,7 +20,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
       - run: uv sync --all-packages --all-extras --frozen
-      - run: uv run pip-audit --strict --skip-editable
+      - run: uv export --locked --all-packages --all-extras --no-emit-workspace --format requirements.txt -o /tmp/propulse-requirements.txt
+      - run: uv run pip-audit --strict -r /tmp/propulse-requirements.txt
       - uses: actions/dependency-review-action@v4
         if: github.event_name == 'pull_request'
         with: { fail-on-severity: high }
@@ -30,10 +31,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv sync --all-packages --all-extras --frozen
-      # no GPL/SSPL dependency may sneak into the Apache-2.0 SDKs
-      - run: uv run pip-licenses --format=csv > /tmp/licenses.csv
-      - run: uv run python scripts/check_dep_licenses.py /tmp/licenses.csv
+      # Audit release/runtime dependencies, not development-only tooling such as reuse.
+      - run: uv export --locked --all-packages --all-extras --no-extra dev --no-emit-workspace --format requirements.txt -o /tmp/propulse-license-requirements.txt
+      - run: uv venv --python 3.12 /tmp/propulse-license-env
+      - run: uv pip install --python /tmp/propulse-license-env/bin/python -r /tmp/propulse-license-requirements.txt pip-licenses
+      # no GPL/SSPL dependency may sneak into the distributed SDK/runtime set
+      - run: /tmp/propulse-license-env/bin/pip-licenses --format=csv > /tmp/licenses.csv
+      - run: python3 scripts/check_dep_licenses.py /tmp/licenses.csv
 
   images:
     runs-on: ubuntu-latest

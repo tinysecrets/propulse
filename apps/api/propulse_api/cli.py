@@ -54,8 +54,8 @@ async def cmd_seed() -> int:
 
     existing = [k async for k in _aiter(store.list_api_keys(tenant_id))]
     if not existing:
-        pub = mint_key("pub", "live")
-        sec = mint_key("sec", "live")
+        pub = mint_key("pub", "test")
+        sec = mint_key("sec", "test")
         for minted in (pub, sec):
             await store.create_api_key(
                 {
