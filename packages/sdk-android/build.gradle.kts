@@ -27,7 +27,7 @@ android {
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
     implementation("com.google.firebase:firebase-messaging")
-    api("androidx.work:work-runtime-ktx:2.10.0")
+    api("androidx.work:work-runtime-ktx:2.12.0")
     api("androidx.core:core-ktx:1.15.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
