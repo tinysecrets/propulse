@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       - run: uv sync --all-packages --all-extras --frozen
       - run: uv export --locked --all-packages --all-extras --no-emit-workspace --format requirements.txt -o /tmp/propulse-requirements.txt
       - run: uv run pip-audit --strict -r /tmp/propulse-requirements.txt
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       # Audit release/runtime dependencies, not development-only tooling such as reuse.
       - run: uv export --locked --all-packages --all-extras --no-extra dev --no-emit-workspace --format requirements.txt -o /tmp/propulse-license-requirements.txt
       - run: uv venv --python 3.12 /tmp/propulse-license-env

@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
         with: { enable-cache: true }
       - run: uv sync --all-packages --all-extras --frozen
       - run: uv run ruff format --check .
@@ -29,7 +29,7 @@ jobs:
     strategy: { matrix: { python: ["3.11", "3.12"] }, fail-fast: false }
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       - run: uv python install ${{ matrix.python }}
       - run: uv sync --python ${{ matrix.python }} --all-packages --all-extras --frozen
       - run: uv run pytest tests/unit -q --cov --cov-report=xml
@@ -76,7 +76,7 @@ jobs:
       BILLING_DRIVER: null
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       - run: uv sync --all-packages --all-extras --frozen
       - run: uv run python -m propulse_api.cli migrate
       - run: uv run pytest tests/integration -q
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       - run: uv sync --all-packages --all-extras --frozen
       - run: uv run python -m propulse_api.cli export-openapi > /tmp/openapi.json
       - name: fail on breaking API change
@@ -102,7 +102,7 @@ jobs:
       MONGO_DB: propulse_migration
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       - run: uv sync --all-packages --all-extras --frozen
       # the previous release must still boot against the new schema (expand/contract)
       - run: uv run pytest tests/integration/test_migration_compat.py -q
@@ -129,7 +129,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       - run: uv sync --all-packages --all-extras --frozen
       - name: record hot-path benchmark baseline
         run: uv run pytest tests/bench -q --benchmark-autosave
@@ -138,7 +138,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       - run: uv sync --all-packages --all-extras --frozen
       - run: uv run mkdocs build --strict
 
