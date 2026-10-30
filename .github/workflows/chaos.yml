@@ -19,7 +19,7 @@ jobs:
       BUS_DRIVER: redis
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
       - run: uv sync --all-extras --frozen
       - name: inject latency and partitions
         run: uv run pytest tests/chaos -q -m chaos --chaos-profile=ci
